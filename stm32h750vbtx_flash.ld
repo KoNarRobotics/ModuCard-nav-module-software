@@ -187,6 +187,26 @@ SECTIONS
     libgcc.a ( * )
   }
 
+  .dtcmram (NOLOAD) : 
+  {
+      *(.dtcmram_section) 
+  } >DTCMRAM
+
+  .ramaxis (NOLOAD) : 
+  {
+      *(.ramaxis_section) 
+  } >RAM
+
+  .ram_d2 (NOLOAD) : 
+  {
+      *(.ram_d2_section)
+  } >RAM_D2
+
+  .ram_d3 (NOLOAD) : 
+  {
+      *(.ram_d3_section)
+  } >RAM_D3
+
 }
 
 

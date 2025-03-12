@@ -1,5 +1,0 @@
-/home/lemonx/it/ModuCard-nav-module-software/build/CMakeFiles/ModuCard_nav_module.dir
-/home/lemonx/it/ModuCard-nav-module-software/build/CMakeFiles/edit_cache.dir
-/home/lemonx/it/ModuCard-nav-module-software/build/CMakeFiles/rebuild_cache.dir
-/home/lemonx/it/ModuCard-nav-module-software/build/cmake/stm32cubemx/CMakeFiles/edit_cache.dir
-/home/lemonx/it/ModuCard-nav-module-software/build/cmake/stm32cubemx/CMakeFiles/rebuild_cache.dir
