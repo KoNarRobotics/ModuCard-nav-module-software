@@ -43,9 +43,9 @@ add_subdirectory(cmake/stm32cubemx)
 
 set(STMEPIC_FDCAN ON)
 
-# add_subdirectory(StmEpic)
+add_subdirectory(StmEpic)
 
-# add_subdirectory(src/can_constants)
+add_subdirectory(src/can_constants)
 
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -55,7 +55,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   # Add user sources here
-  # src/main_prog.cpp
+  src/main_prog.cpp
 )
 
 # Add include paths
@@ -74,8 +74,8 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
   stm32cubemx
-  # stmepic
-  # can_constants
+  stmepic
+  can_constants
 )
 
 
