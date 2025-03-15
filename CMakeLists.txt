@@ -40,19 +40,30 @@ add_executable(${CMAKE_PROJECT_NAME})
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
 
+
+set(STMEPIC_FDCAN ON)
+
+# add_subdirectory(StmEpic)
+
+# add_subdirectory(src/can_constants)
+
 # Link directories setup
 target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined library search paths
+  # Add user defined library search paths
 )
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
+  # Add user sources here
+  # src/main_prog.cpp
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
+  # Add user defined include paths
+  Core/Inc
+  src
+
 )
 
 # Add project symbols (macros)
@@ -62,7 +73,27 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
-    stm32cubemx
-
-    # Add user defined libraries
+  stm32cubemx
+  # stmepic
+  # can_constants
 )
+
+
+############################################################################################################
+# Configure nice task to make life easy  [4/4]
+ 
+add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf firmware.bin
+    COMMAND ${CMAKE_OBJCOPY} -O ihex ${CMAKE_PROJECT_NAME}.elf firmware.hex
+    COMMAND ${CMAKE_SIZE} ${CMAKE_PROJECT_NAME}.elf
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_NAME}.elf firmware.elf
+  # Show ccache statistics
+ )
+ 
+if(CCACHE_PROGRAM)
+  add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${CCACHE_PROGRAM} -s
+  )
+endif()

@@ -22,7 +22,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,6 +57,7 @@ UART_HandleTypeDef huart4;
 
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
+MDMA_HandleTypeDef hmdma_mdma_channel0_quadspi_tc_0;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -72,8 +72,8 @@ const osThreadAttr_t defaultTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
-static void MPU_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_MDMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_FDCAN1_Init(void);
@@ -81,8 +81,8 @@ static void MX_FDCAN2_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_QUADSPI_Init(void);
-static void MX_SPI1_Init(void);
 static void MX_UART4_Init(void);
+static void MX_SPI1_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -105,8 +105,13 @@ int main(void)
 
   /* USER CODE END 1 */
 
-  /* MPU Configuration--------------------------------------------------------*/
-  MPU_Config();
+  /* Enable the CPU Cache */
+
+  /* Enable I-Cache---------------------------------------------------------*/
+  SCB_EnableICache();
+
+  /* Enable D-Cache---------------------------------------------------------*/
+  SCB_EnableDCache();
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -129,6 +134,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_MDMA_Init();
   MX_ADC1_Init();
   MX_DAC1_Init();
   MX_FDCAN1_Init();
@@ -136,8 +142,8 @@ int main(void)
   MX_I2C1_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_QUADSPI_Init();
-  MX_SPI1_Init();
   MX_UART4_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -167,6 +173,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -726,6 +733,53 @@ static void MX_USB_OTG_FS_PCD_Init(void)
 }
 
 /**
+  * Enable MDMA controller clock
+  * Configure MDMA for global transfers
+  *   hmdma_mdma_channel0_quadspi_tc_0
+  */
+static void MX_MDMA_Init(void)
+{
+
+  /* MDMA controller clock enable */
+  __HAL_RCC_MDMA_CLK_ENABLE();
+  /* Local variables */
+
+  /* Configure MDMA channel MDMA_Channel0 */
+  /* Configure MDMA request hmdma_mdma_channel0_quadspi_tc_0 on MDMA_Channel0 */
+  hmdma_mdma_channel0_quadspi_tc_0.Instance = MDMA_Channel0;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.Request = MDMA_REQUEST_QUADSPI_TC;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.Priority = MDMA_PRIORITY_VERY_HIGH;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceInc = MDMA_SRC_INC_BYTE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.DestinationInc = MDMA_DEST_INC_BYTE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.BufferTransferLength = 1;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceBlockAddressOffset = 0;
+  hmdma_mdma_channel0_quadspi_tc_0.Init.DestBlockAddressOffset = 0;
+  if (HAL_MDMA_Init(&hmdma_mdma_channel0_quadspi_tc_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Configure post request address and data masks */
+  if (HAL_MDMA_ConfigPostRequestMask(&hmdma_mdma_channel0_quadspi_tc_0, 0, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* MDMA interrupt initialization */
+  /* MDMA_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(MDMA_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(MDMA_IRQn);
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -816,35 +870,6 @@ void StartDefaultTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END 5 */
-}
-
- /* MPU Configuration */
-
-void MPU_Config(void)
-{
-  MPU_Region_InitTypeDef MPU_InitStruct = {0};
-
-  /* Disables the MPU */
-  HAL_MPU_Disable();
-
-  /** Initializes and configures the Region and the memory to be protected
-  */
-  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
-  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
-  MPU_InitStruct.BaseAddress = 0x0;
-  MPU_InitStruct.Size = MPU_REGION_SIZE_4GB;
-  MPU_InitStruct.SubRegionDisable = 0x87;
-  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
-  MPU_InitStruct.AccessPermission = MPU_REGION_NO_ACCESS;
-  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_DISABLE;
-  MPU_InitStruct.IsShareable = MPU_ACCESS_SHAREABLE;
-  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
-  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
-
-  HAL_MPU_ConfigRegion(&MPU_InitStruct);
-  /* Enables the MPU */
-  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
-
 }
 
 /**

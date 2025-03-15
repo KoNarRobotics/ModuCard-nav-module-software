@@ -40,5 +40,5 @@ so we don't have to do anything for them.
 /* in line 64 we modify this */
 static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 /* to this */
-_attribute__((section(".ramaxis_section"))) static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
+ __attribute__((section(".ramaxis_section"))) static uint8_t ucHeap[ configTOTAL_HEAP_SIZE ];
 ```
