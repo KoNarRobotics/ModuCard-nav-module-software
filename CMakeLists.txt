@@ -82,6 +82,15 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
 ############################################################################################################
 # Configure nice task to make life easy  [4/4]
  
+find_program(CCACHE_PROGRAM ccache)
+if(NOT CCACHE_PROGRAM)
+    message(STATUS "ccache not found")
+else()
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CCACHE_PROGRAM}")
+endif()
+
+
 add_custom_command(
     TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf firmware.bin

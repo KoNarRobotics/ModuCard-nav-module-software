@@ -7,10 +7,11 @@ main_file="Core/Src/main.c"
 main_file_cpp="Core/Src/main.cpp"
 include_file="Core/Inc/main.hpp"
 cmake_file="cmake/stm32cubemx/CMakeLists.txt"
+heap_file="Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c"
 
 
 if [ -f $main_file ]; then
-  cp $main_file $main_file_cpp
+  mv $main_file $main_file_cpp
 
   sed -i '/\/\* USER CODE BEGIN Includes \*\//a #include "main_prog.hpp"' $main_file_cpp
   sed -i '/osKernelInitialize();/a   main_prog();' $main_file_cpp
@@ -34,5 +35,8 @@ if [ -f $main_file ]; then
   if grep -q "../../Core/Src/main.c" $cmake_file; then
     sed -i 's|\.\./\.\./Core/Src/main\.c|../../Core/Src/main.cpp|' $cmake_file
   fi
+
+  sed -i 's|static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|__attribute__((section(".ramaxis_section"))) static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|' $heap_file
+
 
 fi
