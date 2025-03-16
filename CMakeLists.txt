@@ -43,7 +43,7 @@ add_subdirectory(cmake/stm32cubemx)
 
 set(STMEPIC_FDCAN ON)
 
-add_subdirectory(StmEpic)
+add_subdirectory(src/StmEpic)
 
 add_subdirectory(src/can_constants)
 
