@@ -1,7 +1,8 @@
 #include "main.hpp"
 #include "main_prog.hpp"
 #include "Timing.hpp"
-
+#include "encoder_magnetic.hpp"
+#include "BNO055.hpp"
 namespace se = stmepic;
 
 /**
@@ -26,6 +27,7 @@ namespace se = stmepic;
 
 
 void main_prog(){
+  se::sensors::imu::BNO055 imu(nullptr, nullptr, nullptr);
   // se::Ticker::get_instance().init(&htim6);
 
   // Your code here like your tasks, drivers, etc.
