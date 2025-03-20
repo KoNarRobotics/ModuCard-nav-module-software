@@ -27,7 +27,7 @@ namespace se = stmepic;
 
 
 void main_prog(){
-  se::sensors::imu::BNO055 imu(nullptr, nullptr, nullptr);
+  STMEPIC_ASSING_OR_HRESET(imu, se::sensors::imu::BNO055::Make(nullptr, nullptr, nullptr));
   // se::Ticker::get_instance().init(&htim6);
 
   // Your code here like your tasks, drivers, etc.
