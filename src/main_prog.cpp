@@ -1,8 +1,10 @@
 #include "main.hpp"
 #include "main_prog.hpp"
 #include "Timing.hpp"
+#include "simple_task.hpp"
 
 namespace se = stmepic;
+
 
 /**
   * @brief  Period elapsed callback in non blocking mode
@@ -25,7 +27,30 @@ namespace se = stmepic;
 
 
 
+se::SimpleTask task_blink;
+
+
+void task_blink_func(se::SimpleTask &task ,void *pvParameters) {
+  while (1) {
+    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    vTaskDelay(1000);
+  }
+}
+
+
 void main_prog(){
+  // task_blink.task_init(task_blink_func,nullptr,100,nullptr);
+  // task_blink.task_run();
+  HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
+
+  while (true)
+  {
+    HAL_GPIO_TogglePin(USER_LED_1_GPIO_Port, USER_LED_1_Pin);
+    HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
+    vTaskDelay(500);
+  }
+  
+
   // se::Ticker::get_instance().init(&htim6);
 
   // Your code here like your tasks, drivers, etc.

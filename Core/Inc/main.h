@@ -57,6 +57,30 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define USER_LED_1_Pin GPIO_PIN_3
+#define USER_LED_1_GPIO_Port GPIOE
+#define USER_LED_2_Pin GPIO_PIN_4
+#define USER_LED_2_GPIO_Port GPIOE
+#define STATUS_LED_Pin GPIO_PIN_5
+#define STATUS_LED_GPIO_Port GPIOE
+#define USR_BUTTON_Pin GPIO_PIN_6
+#define USR_BUTTON_GPIO_Port GPIOE
+#define GPS_GEOFENCE_STAT_Pin GPIO_PIN_2
+#define GPS_GEOFENCE_STAT_GPIO_Port GPIOD
+#define GPS_RTK_STAT_Pin GPIO_PIN_3
+#define GPS_RTK_STAT_GPIO_Port GPIOD
+#define GPS_EXINTERUPT_Pin GPIO_PIN_4
+#define GPS_EXINTERUPT_GPIO_Port GPIOD
+#define GPS_MODE_SELECT_Pin GPIO_PIN_5
+#define GPS_MODE_SELECT_GPIO_Port GPIOD
+#define GPS_NRESET_Pin GPIO_PIN_6
+#define GPS_NRESET_GPIO_Port GPIOD
+#define BOOT_EN_Pin GPIO_PIN_7
+#define BOOT_EN_GPIO_Port GPIOB
+#define IMU_EXINTERUPT_Pin GPIO_PIN_0
+#define IMU_EXINTERUPT_GPIO_Port GPIOE
+#define IMU_NRESET_Pin GPIO_PIN_1
+#define IMU_NRESET_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 
