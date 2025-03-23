@@ -56,6 +56,9 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   # Add user sources here
   src/main_prog.cpp
+  # src/quadspi/Dev_Inf.c
+  # src/quadspi/Loader_Src.c
+  # src/quadspi/W25Q128.c
 )
 
 # Add include paths
@@ -63,7 +66,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
   # Add user defined include paths
   Core/Inc
   src
-
+  src/quadspi
 )
 
 # Add project symbols (macros)
