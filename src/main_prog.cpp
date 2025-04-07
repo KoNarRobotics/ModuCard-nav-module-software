@@ -26,7 +26,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 
 
-
 se::SimpleTask task_blink;
 
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
@@ -37,7 +36,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 }
 
 void main_prog() {
-  task_blink.task_init(task_blink_func,nullptr,100,nullptr);
+  task_blink.task_init(task_blink_func, nullptr, 100, nullptr);
   task_blink.task_run();
 
   // FDCAN_FilterTypeDef sFilterConfig;
@@ -52,9 +51,9 @@ void main_prog() {
     HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
     HAL_Delay(100);
     se::CanDataFrame frame;
-    frame.extended_id = false;
-    frame.frame_id  = 0x123;
-    frame.data[0] = 0x12;
+    frame.extended_id    = false;
+    frame.frame_id       = 0x123;
+    frame.data[0]        = 0x12;
     frame.remote_request = false;
     // fdcan->write(frame);
   }

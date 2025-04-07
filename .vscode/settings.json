@@ -1,6 +1,6 @@
 {
   "ros.distro": "humble",
-  "stm32-for-vscode.openOCDPath": false,
+  "stm32-for-vscode.openOCDPath": true,
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
@@ -63,5 +63,6 @@
   "python.analysis.extraPaths": [
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages"
-  ]
+  ],
+  // "cortex-debug.gdbPath": "gdb-multiarch"
 }
