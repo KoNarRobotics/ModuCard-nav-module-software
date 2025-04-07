@@ -12,6 +12,42 @@
       "type": "cortex-debug",
       "runToEntryPoint": "main",
       "servertype": "stlink",
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "name": "Debug launch OpenOCD",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/stlink.cfg",
+        "${workspaceFolder}/stm32h7x.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "serverpath": "openocd",
+      "serialNumber": "49FF6B064978785130411667",
+      "breakAfterReset": false
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "name": "Debug attach OpenOCD",
+      "request": "attach",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "configFiles": [
+        "/usr/share/openocd/scripts/interface/stlink.cfg",
+        "/usr/share/openocd/scripts/target/stm32h7x.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "serverpath": "/usr/bin/openocd",
+      "serialNumber": "49FF6B064978785130411667",
+      "breakAfterReset": false
     }
   ]
 }
