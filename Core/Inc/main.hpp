@@ -15,5 +15,4 @@ extern SPI_HandleTypeDef hspi1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim12;
 extern UART_HandleTypeDef huart4;
-extern PCD_HandleTypeDef hpcd_USB_OTG_FS;
 extern MDMA_HandleTypeDef hmdma_mdma_channel0_quadspi_tc_0;
