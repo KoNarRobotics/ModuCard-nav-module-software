@@ -5,13 +5,63 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Cortex Debug",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "name": "Launch OpenOCD",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/stlink.cfg",
+        "${workspaceFolder}/stm32h7x.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "serialNumber": "49FF6B064978785130411667",
+      "breakAfterReset": false
+    },
+    {
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "name": "Attach OpenOCD",
+      "request": "attach",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/stlink.cfg",
+        "${workspaceFolder}/stm32h7x.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both",
+      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "serialNumber": "49FF6B064978785130411667",
+      "breakAfterReset": false
+    },
+    {
+      "name": "Launch ST-GDB",
       "cwd": "${workspaceFolder}",
       "executable": "${workspaceFolder}/build/firmware.elf",
       "request": "launch",
       "type": "cortex-debug",
       "runToEntryPoint": "main",
       "servertype": "stlink",
+      // "serverArgs":
+      // [
+      // "-s",
+      // "-m", "0",
+      // "-k",
+      // "--frequency", "4000",
+      // "-el ${workspaceFolder}/build/firmware.stldr"
+      // ],
+      // "device":"STM32H750VBT6" ,
+      // "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "serialNumber": "49FF6B064978785130411667"
+    }
+  ],
+  "setupCommands": [
+    {
+      "text": "set output-radix 2"
     }
   ]
 }

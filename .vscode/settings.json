@@ -1,6 +1,6 @@
 {
   "ros.distro": "humble",
-  "stm32-for-vscode.openOCDPath": false,
+  "stm32-for-vscode.openOCDPath": "/usr/bin/openocd",
   "files.associations": {
     "array": "cpp",
     "atomic": "cpp",
