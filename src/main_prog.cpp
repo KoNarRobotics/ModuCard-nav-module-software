@@ -3,9 +3,18 @@
 #include "Timing.hpp"
 #include "simple_task.hpp"
 #include "fdcan.hpp"
+#include "BNO055.hpp"
 
 namespace se = stmepic;
 
+
+std::shared_ptr<se::I2C> i2c1;
+std::shared_ptr<se::sensors::imu::BNO055> bno055;
+se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_6);
+se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
+se::GpioPin gpio_boot_enable(*BOOT_EN_GPIO_Port, BOOT_EN_Pin);
+se::GpioPin gpio_imu_reset(*IMU_NRESET_GPIO_Port, IMU_NRESET_Pin);
+se::GpioPin gpio_imu_exinterupt(*IMU_EXINTERUPT_GPIO_Port, IMU_EXINTERUPT_Pin);
 
 /**
  * @brief  Period elapsed callback in non blocking mode
@@ -15,6 +24,7 @@ namespace se = stmepic;
  * @param  htim : TIM handle
  * @retval None
  */
+extern "C" {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if(htim->Instance == TIM6) {
     se::Ticker::get_instance().irq_update_ticker();
@@ -24,18 +34,40 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
     HAL_IncTick();
   }
 }
-
+}
 
 se::SimpleTask task_blink;
 
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
+  gpio_imu_reset.write(1);
   while(1) {
-    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    vTaskDelay(1000);
+    HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
+    auto stat = i2c1->is_device_ready(0x29, 1, 500);
+    // vTaskDelay(3);
+    // stat = i2c1->is_device_ready(0x76, 1, 500);
+    vTaskDelay(50);
   }
 }
 
+
 void main_prog() {
+  HAL_NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
+  HAL_TIM_Base_Start_IT(&htim6);
+
+
+  STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
+  i2c1->hardware_reset();
+
+
+  // STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
+  // se::DeviceThreadedSettings settings;
+  // settings.uxStackDepth = 512;
+  // settings.uxPriority   = 2;
+  // settings.period       = 100;
+  // bno055->device_task_set_settings(settings);
+  // STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr);
   task_blink.task_run();
 
@@ -46,17 +78,17 @@ void main_prog() {
 
   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
 
-  while(true) {
-    HAL_GPIO_TogglePin(USER_LED_1_GPIO_Port, USER_LED_1_Pin);
-    HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
-    HAL_Delay(100);
-    se::CanDataFrame frame;
-    frame.extended_id    = false;
-    frame.frame_id       = 0x123;
-    frame.data[0]        = 0x12;
-    frame.remote_request = false;
-    // fdcan->write(frame);
-  }
+  // while(true) {
+  //   HAL_GPIO_TogglePin(USER_LED_1_GPIO_Port, USER_LED_1_Pin);
+  //   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
+  //   HAL_Delay(100);
+  //   se::CanDataFrame frame;
+  //   frame.extended_id    = false;
+  //   frame.frame_id       = 0x123;
+  //   frame.data[0]        = 0x12;
+  //   frame.remote_request = false;
+  //   // fdcan->write(frame);
+  // }
 
 
   // se::Ticker::get_instance().init(&htim6);

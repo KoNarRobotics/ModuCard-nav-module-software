@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -53,17 +52,19 @@ FDCAN_HandleTypeDef hfdcan2;
 HRTIM_HandleTypeDef hhrtim;
 
 I2C_HandleTypeDef hi2c1;
+DMA_HandleTypeDef hdma_i2c1_rx;
+DMA_HandleTypeDef hdma_i2c1_tx;
 
 QSPI_HandleTypeDef hqspi;
 
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim12;
 
 UART_HandleTypeDef huart4;
 
-MDMA_HandleTypeDef hmdma_mdma_channel0_quadspi_tc_0;
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
@@ -77,9 +78,8 @@ const osThreadAttr_t defaultTask_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void PeriphCommonClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_MDMA_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_FDCAN1_Init(void);
@@ -91,6 +91,7 @@ static void MX_SPI1_Init(void);
 static void MX_HRTIM_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM12_Init(void);
+static void MX_TIM6_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -113,14 +114,6 @@ int main(void)
 
   /* USER CODE END 1 */
 
-  /* Enable the CPU Cache */
-
-  /* Enable I-Cache---------------------------------------------------------*/
-  SCB_EnableICache();
-
-  /* Enable D-Cache---------------------------------------------------------*/
-  SCB_EnableDCache();
-
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -133,16 +126,13 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* Configure the peripherals common clocks */
-  PeriphCommonClock_Config();
-
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_MDMA_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_DAC1_Init();
   MX_FDCAN1_Init();
@@ -154,6 +144,7 @@ int main(void)
   MX_HRTIM_Init();
   MX_TIM2_Init();
   MX_TIM12_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -259,33 +250,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief Peripherals Common Clock Configuration
-  * @retval None
-  */
-void PeriphCommonClock_Config(void)
-{
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-
-  /** Initializes the peripherals clock
-  */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_ADC;
-  PeriphClkInitStruct.PLL3.PLL3M = 1;
-  PeriphClkInitStruct.PLL3.PLL3N = 13;
-  PeriphClkInitStruct.PLL3.PLL3P = 2;
-  PeriphClkInitStruct.PLL3.PLL3Q = 3;
-  PeriphClkInitStruct.PLL3.PLL3R = 2;
-  PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_3;
-  PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOMEDIUM;
-  PeriphClkInitStruct.PLL3.PLL3FRACN = 0;
-  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
-  PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL3;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
@@ -433,7 +397,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.ProtocolException = DISABLE;
   hfdcan1.Init.NominalPrescaler = 8;
   hfdcan1.Init.NominalSyncJumpWidth = 1;
-  hfdcan1.Init.NominalTimeSeg1 = 1;
+  hfdcan1.Init.NominalTimeSeg1 = 13;
   hfdcan1.Init.NominalTimeSeg2 = 1;
   hfdcan1.Init.DataPrescaler = 1;
   hfdcan1.Init.DataSyncJumpWidth = 1;
@@ -596,7 +560,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x00B03FDB;
+  hi2c1.Init.Timing = 0x302027FF;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -757,6 +721,44 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 480;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 999;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
   * @brief TIM12 Initialization Function
   * @param None
   * @retval None
@@ -851,49 +853,21 @@ static void MX_UART4_Init(void)
 }
 
 /**
-  * Enable MDMA controller clock
-  * Configure MDMA for global transfers
-  *   hmdma_mdma_channel0_quadspi_tc_0
+  * Enable DMA controller clock
   */
-static void MX_MDMA_Init(void)
+static void MX_DMA_Init(void)
 {
 
-  /* MDMA controller clock enable */
-  __HAL_RCC_MDMA_CLK_ENABLE();
-  /* Local variables */
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
-  /* Configure MDMA channel MDMA_Channel0 */
-  /* Configure MDMA request hmdma_mdma_channel0_quadspi_tc_0 on MDMA_Channel0 */
-  hmdma_mdma_channel0_quadspi_tc_0.Instance = MDMA_Channel0;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.Request = MDMA_REQUEST_QUADSPI_TC;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.TransferTriggerMode = MDMA_FULL_TRANSFER;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.Priority = MDMA_PRIORITY_VERY_HIGH;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.Endianness = MDMA_LITTLE_ENDIANNESS_PRESERVE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceInc = MDMA_SRC_INC_BYTE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.DestinationInc = MDMA_DEST_INC_BYTE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceDataSize = MDMA_SRC_DATASIZE_BYTE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.DestDataSize = MDMA_DEST_DATASIZE_BYTE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.BufferTransferLength = 1;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceBurst = MDMA_SOURCE_BURST_SINGLE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.DestBurst = MDMA_DEST_BURST_SINGLE;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.SourceBlockAddressOffset = 0;
-  hmdma_mdma_channel0_quadspi_tc_0.Init.DestBlockAddressOffset = 0;
-  if (HAL_MDMA_Init(&hmdma_mdma_channel0_quadspi_tc_0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* Configure post request address and data masks */
-  if (HAL_MDMA_ConfigPostRequestMask(&hmdma_mdma_channel0_quadspi_tc_0, 0, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* MDMA interrupt initialization */
-  /* MDMA_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(MDMA_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(MDMA_IRQn);
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMA1_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
 
 }
 
@@ -987,8 +961,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
