@@ -4,17 +4,29 @@
 #include "simple_task.hpp"
 #include "fdcan.hpp"
 #include "BNO055.hpp"
+#include "BMP280.hpp"
 
 namespace se = stmepic;
 
 
 std::shared_ptr<se::I2C> i2c1;
-std::shared_ptr<se::sensors::imu::BNO055> bno055;
+std::shared_ptr<se::sensors::imu::BNO055> bno055       = nullptr;
+std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
 se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_6);
 se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
 se::GpioPin gpio_boot_enable(*BOOT_EN_GPIO_Port, BOOT_EN_Pin);
-se::GpioPin gpio_imu_reset(*IMU_NRESET_GPIO_Port, IMU_NRESET_Pin);
+se::GpioPin gpio_imu_nreset(*IMU_NRESET_GPIO_Port, IMU_NRESET_Pin);
 se::GpioPin gpio_imu_exinterupt(*IMU_EXINTERUPT_GPIO_Port, IMU_EXINTERUPT_Pin);
+
+se::GpioPin gpio_user_led_1(*USER_LED_1_GPIO_Port, USER_LED_1_Pin);
+se::GpioPin gpio_user_led_2(*USER_LED_2_GPIO_Port, USER_LED_2_Pin);
+se::GpioPin gpio_status_led(*STATUS_LED_GPIO_Port, STATUS_LED_Pin);
+se::GpioPin gpio_usr_button(*USR_BUTTON_GPIO_Port, USR_BUTTON_Pin);
+se::GpioPin gpio_gps_geofence_stat(*GPS_GEOFENCE_STAT_GPIO_Port, GPS_GEOFENCE_STAT_Pin);
+se::GpioPin gpio_gps_rtk_stat(*GPS_RTK_STAT_GPIO_Port, GPS_RTK_STAT_Pin);
+se::GpioPin gpio_gps_exinterupt(*GPS_EXINTERUPT_GPIO_Port, GPS_EXINTERUPT_Pin);
+se::GpioPin gpio_gps_mode_select(*GPS_MODE_SELECT_GPIO_Port, GPS_MODE_SELECT_Pin);
+se::GpioPin gpio_gps_nreset(*GPS_NRESET_GPIO_Port, GPS_NRESET_Pin);
 
 /**
  * @brief  Period elapsed callback in non blocking mode
@@ -39,13 +51,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 se::SimpleTask task_blink;
 
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
-  gpio_imu_reset.write(1);
+  gpio_imu_nreset.write(1);
+  gpio_user_led_1.write(0);
+  gpio_user_led_2.write(0);
+  se::Status stat = se::Status::OK();
+
+  se::DeviceThreadedSettings settings;
+  settings.uxStackDepth = 512;
+  settings.uxPriority   = 2;
+  settings.period       = 10;
+
+  STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
+  bmp280->device_task_set_settings(settings);
+  // bmp280->device_start();
+  STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+
   while(1) {
-    HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
-    auto stat = i2c1->is_device_ready(0x29, 1, 500);
-    // vTaskDelay(3);
-    // stat = i2c1->is_device_ready(0x76, 1, 500);
-    vTaskDelay(50);
+    gpio_user_led_1.toggle();
+    auto devices = i2c1->is_device_ready(0x29, 1, 500);
+    vTaskDelay(100);
   }
 }
 
@@ -56,19 +80,15 @@ void main_prog() {
   HAL_TIM_Base_Start_IT(&htim6);
 
 
-  STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
+  STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
   i2c1->hardware_reset();
 
 
   // STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
-  // se::DeviceThreadedSettings settings;
-  // settings.uxStackDepth = 512;
-  // settings.uxPriority   = 2;
-  // settings.period       = 100;
   // bno055->device_task_set_settings(settings);
   // STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
 
-  task_blink.task_init(task_blink_func, nullptr, 100, nullptr);
+  task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
   task_blink.task_run();
 
   // FDCAN_FilterTypeDef sFilterConfig;
