@@ -42,6 +42,10 @@ if [ -f $main_file ]; then
     sed -i 's|\.\./\.\./Core/Src/main\.c|../../Core/Src/main.cpp|' $cmake_file
   fi
 
+  # Remove the line containing "../../Core/Src/syscalls.c" from the CMake file
+  sed -i '/\.\.\/\.\.\/Core\/Src\/syscalls\.c/d' $cmake_file
+
+
   sed -i 's|static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|__attribute__((section(".ramaxis_section"))) static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|' $heap_file
 
   rm -rf CMakePresets.json
