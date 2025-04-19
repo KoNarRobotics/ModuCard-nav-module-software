@@ -5,9 +5,57 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Remote Launch OpenOCD",
+      "type": "cortex-debug",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "request": "launch",
+      "servertype": "external",
+      // This may need to be arm-none-eabi-gdb depending on your system
+      "gdbPath": "arm-none-eabi-gdb",
+      // Connect to an already running OpenOCD instance
+      "gdbTarget": "${input:remoteIP}:${input:remotePort}",
+      //"runToMain": true,
+      "runToEntryPoint": "main",
+      // Work around for stopping at main on restart
+      "postRestartCommands": [
+        "break main",
+        "continue"
+      ],
+      "preLaunchTask": "Start-Remote-OpenOCD",
+      "preLaunchTaskInputs": {
+        "remoteIP": "${input:remoteIP}",
+        "remotePort": "${input:remotePort}"
+      },
+    },
+    {
+      "name": "Remote Attach OpenOCD",
+      "type": "cortex-debug",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "request": "attach",
+      "servertype": "external",
+      // This may need to be arm-none-eabi-gdb depending on your system
+      "gdbPath": "arm-none-eabi-gdb",
+      // Connect to an already running OpenOCD instance
+      "gdbTarget": "${input:remoteIP}:${input:remotePort}",
+      //"runToMain": true,
+      "runToEntryPoint": "main",
+      // Work around for stopping at main on restart
+      "postRestartCommands": [
+        "break main",
+        "continue"
+      ],
+      "preLaunchTask": "Start-Remote-OpenOCD",
+      "preLaunchTaskInputs": {
+        "remoteIP": "${input:remoteIP}",
+        "remotePort": "${input:remotePort}"
+      },
+    },
+    {
       "cwd": "${workspaceFolder}",
       "executable": "${workspaceFolder}/build/firmware.elf",
-      "name": "Launch OpenOCD",
+      "name": "Local Launch OpenOCD",
       "request": "launch",
       "type": "cortex-debug",
       "servertype": "openocd",
@@ -66,6 +114,24 @@
   "setupCommands": [
     {
       "text": "set output-radix 2"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "remoteIP",
+      "type": "pickString",
+      "description": "Enter the IP address of the remote machine",
+      "options": [
+        "10.10.0.6",
+        "192.168.20.2"
+      ],
+      "default": "10.10.0.6"
+    },
+    {
+      "id": "remotePort",
+      "type": "promptString",
+      "description": "Enter the port number for the gdb",
+      "default": "50000"
     }
   ]
 }

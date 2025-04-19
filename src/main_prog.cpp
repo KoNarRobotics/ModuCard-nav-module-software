@@ -77,6 +77,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     for(auto &device : devices) {
       log_info("Device found:" + std::to_string(device));
     }
+    gpio_user_led_2.toggle();
   }
 }
 
