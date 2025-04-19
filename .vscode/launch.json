@@ -15,8 +15,12 @@
         "${workspaceFolder}/stlink.cfg",
         "${workspaceFolder}/stm32h7x.cfg"
       ],
+      "serverArgs": [
+        "-c",
+        "init; arm semihosting enable"
+      ],
       "runToEntryPoint": "main",
-      "showDevDebugOutput": "both",
+      // "showDevDebugOutput": "both",
       "svdFile": "${workspaceFolder}/STM32H750.svd",
       "serialNumber": "49FF6B064978785130411667",
       "breakAfterReset": false

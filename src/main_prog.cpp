@@ -5,7 +5,7 @@
 #include "fdcan.hpp"
 #include "BNO055.hpp"
 #include "BMP280.hpp"
-
+#include "logger.hpp"
 namespace se = stmepic;
 
 
@@ -67,9 +67,16 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
 
   while(1) {
-    gpio_user_led_1.toggle();
-    auto devices = i2c1->is_device_ready(0x29, 1, 500);
     vTaskDelay(100);
+    gpio_user_led_1.toggle();
+
+    auto mayby_devices = i2c1->scan_for_devices();
+    if(!mayby_devices.ok())
+      continue;
+    auto devices = mayby_devices.valueOrDie();
+    for(auto &device : devices) {
+      log_info("Device found:" + std::to_string(device));
+    }
   }
 }
 
@@ -79,6 +86,8 @@ void main_prog() {
   HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
 
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, "0.0.1");
+
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
   i2c1->hardware_reset();
@@ -87,6 +96,7 @@ void main_prog() {
   // STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
   // bno055->device_task_set_settings(settings);
   // STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+  // printf("Semihosting test\n");
 
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
   task_blink.task_run();

@@ -21,6 +21,8 @@ endif()
 # Set the project name
 set(CMAKE_PROJECT_NAME ModuCard_nav_module)
 
+
+
 # Include toolchain file
 include("cmake/gcc-arm-none-eabi.cmake")
 
@@ -34,16 +36,25 @@ enable_language(C ASM)
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
+
+
+
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
-# Add STM32CubeMX generated sources
-add_subdirectory(cmake/stm32cubemx)
+
 
 
 set(STMEPIC_FDCAN ON)
 
 add_subdirectory(src/StmEpic)
+
+message(INFO "Linker flags: " ${CMAKE_C_LINK_FLAGS})
+
+
+# Add STM32CubeMX generated sources
+add_subdirectory(cmake/stm32cubemx)
+
 
 add_subdirectory(src/can_constants)
 
