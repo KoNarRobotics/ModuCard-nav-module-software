@@ -1,14 +1,36 @@
 {
   "version": "2.0.0",
   "tasks": [
+    // {
+    //   "label": "Setup-Remote-Workspace",
+    //   "type": "shell",
+    //   "command": "ssh",
+    //   "args": [
+    //     "${input:remoteUser}@${input:remoteIP}",
+    //     "\"bash -c 'mkdir -p ~/debug/${workspaceFolderBasename} && exit'\""
+    //   ],
+    //   "problemMatcher": []
+    // },
+    // {
+    //   "label": "Copy-Files-To-Remote",
+    //   "type": "shell",
+    //   "dependsOn": "Setup-Remote-Workspace",
+    //   "command": "bash",
+    //   "args": [
+    //     "-c",
+    //     " scp ${workspaceFolder}/build/firmware.elf ${input:remoteUser}@${input:remoteIP}:~/debug/${workspaceFolderBasename}"
+    //   ],
+    //   "problemMatcher": []
+    // },
     {
       "label": "Start-Remote-OpenOCD",
       "type": "shell",
       // "dependsOn": "Copy-Files-To-Remote",
       "command": "ssh",
       "args": [
-        "${input:remoteUser}@${remoteIP}",
-        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${remotePort}\" -f interface/stlink.cfg -f target/stm32h7x.cfg  -c \"init; arm semihosting enable\"'"
+        "-t", // Force pseudo-terminal allocation
+        "${input:remoteUser}@${input:remoteIP}",
+        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:remotePort}\" -f interface/stlink.cfg -f target/stm32h7x.cfg -c \"hla_serial 49FF6B064978785130411667\" -c \"init; arm semihosting enable\"'"
       ],
       "isBackground": true, // run task in backgound
       "problemMatcher": {

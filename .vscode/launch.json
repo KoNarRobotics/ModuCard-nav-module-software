@@ -17,16 +17,13 @@
       "gdbTarget": "${input:remoteIP}:${input:remotePort}",
       //"runToMain": true,
       "runToEntryPoint": "main",
+      // "serialNumber": "49FF6B064978785130411667", // serial number of the ST-Link have to be placed in task.json
       // Work around for stopping at main on restart
       "postRestartCommands": [
         "break main",
         "continue"
       ],
-      "preLaunchTask": "Start-Remote-OpenOCD",
-      "preLaunchTaskInputs": {
-        "remoteIP": "${input:remoteIP}",
-        "remotePort": "${input:remotePort}"
-      },
+      "preLaunchTask": "Start-Remote-OpenOCD"
     },
     {
       "name": "Remote Attach OpenOCD",
