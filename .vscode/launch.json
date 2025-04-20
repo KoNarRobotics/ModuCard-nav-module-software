@@ -14,7 +14,7 @@
       // This may need to be arm-none-eabi-gdb depending on your system
       "gdbPath": "arm-none-eabi-gdb",
       // Connect to an already running OpenOCD instance
-      "gdbTarget": "${input:remoteIP}:${input:remotePort}",
+      "gdbTarget": "${input:remoteIP}:${input:getPort}",
       //"runToMain": true,
       "runToEntryPoint": "main",
       // "serialNumber": "49FF6B064978785130411667", // serial number of the ST-Link have to be placed in task.json
@@ -119,8 +119,14 @@
       "type": "pickString",
       "description": "Enter the IP address of the remote machine",
       "options": [
-        "10.10.0.6",
-        "192.168.20.2"
+        {
+          "label": "VPN",
+          "value": "10.10.0.6"
+        },
+        {
+          "label": "Local",
+          "value": "192.168.20.2"
+        }
       ],
       "default": "10.10.0.6"
     },
@@ -129,6 +135,18 @@
       "type": "promptString",
       "description": "Enter the port number for the gdb",
       "default": "50000"
+    },
+    {
+      "id": "getPort",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "shuf -i 50001-59999 -n 1 > .vscode/gdb-port.txt && cat .vscode/gdb-port.txt",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+        }
+      }
     }
   ]
 }

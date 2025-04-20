@@ -22,15 +22,33 @@
     //   ],
     //   "problemMatcher": []
     // },
+    // {
+    //   "label": "Generate-Random-Port",
+    //   "type": "shell",
+    //   "command": "shuf -i 50001-59999 -n 1 > .vscode/random-port.txt",
+    //   "problemMatcher": []
+    // },
+    // {
+    //   "label": "Read-Port",
+    //   "type": "shell",
+    //   "command": "echo  ${input:getPort}",
+    //   "problemMatcher": [],
+    //   "presentation": {
+    //     "echo": false,
+    //     "reveal": "always",
+    //     "focus": true,
+    //     "panel": "new"
+    //   }
+    // },
     {
       "label": "Start-Remote-OpenOCD",
       "type": "shell",
-      // "dependsOn": "Copy-Files-To-Remote",
+      "dependsOn": "Generate-Random-Port",
       "command": "ssh",
       "args": [
         "-t", // Force pseudo-terminal allocation
         "${input:remoteUser}@${input:remoteIP}",
-        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:remotePort}\" -f interface/stlink.cfg -f target/stm32h7x.cfg -c \"hla_serial 49FF6B064978785130411667\" -c \"init; arm semihosting enable\"'"
+        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:getPort}\" -f interface/stlink.cfg -f target/stm32h7x.cfg -c \"hla_serial ${input:stlinkID}\" -c \"init; arm semihosting enable\"'"
       ],
       "isBackground": true, // run task in backgound
       "problemMatcher": {
@@ -67,8 +85,14 @@
       "type": "pickString",
       "description": "Enter the IP address of the remote machine",
       "options": [
-        "10.10.0.6",
-        "192.168.20.2"
+        {
+          "label": "VPN",
+          "value": "10.10.0.6"
+        },
+        {
+          "label": "Local",
+          "value": "192.168.20.2"
+        }
       ],
       "default": "10.10.0.6"
     },
@@ -77,6 +101,24 @@
       "type": "promptString",
       "description": "Enter the port number for the gdb",
       "default": "50000"
+    },
+    {
+      "id": "stlinkID",
+      "type": "promptString",
+      "description": "Enter the ST-LINK ID to connect to",
+      "default": "49FF6B064978785130411667"
+    },
+    {
+      "id": "getPort",
+      "type": "command",
+      "command": "shellCommand.execute",
+      "args": {
+        "command": "cat .vscode/gdb-port.txt",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "WORKSPACE": "${workspaceFolder[0]}",
+        }
+      }
     }
   ]
 }
