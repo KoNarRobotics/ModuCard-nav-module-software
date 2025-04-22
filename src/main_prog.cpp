@@ -72,21 +72,27 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     auto get_data = bmp280->get_data();
     if(get_data.ok()) {
       auto data = get_data.valueOrDie();
-      log_info("BMP280: " + std::to_string(data.temp) + " " + std::to_string(data.pressure));
+      log_info("BMP280: Temp:" + std::to_string(data.temp) + " hP:" + std::to_string(data.pressure));
     } else {
       log_error("BMP280: " + get_data.status().to_string());
     }
 
-  //   auto mayby_devices = i2c1->scan_for_devices();
-  //   if(!mayby_devices.ok())
-  //     continue;
-  //   auto devices = mayby_devices.valueOrDie();
-  //   for(auto &device : devices) {
-  //     log_info("Device found:" + std::to_string(device));
-  //   }
-  //   gpio_user_led_2.toggle();
-  // }
-}
+    if(CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
+      gpio_user_led_2.toggle();
+    }
+
+    //   auto mayby_devices = i2c1->scan_for_devices();
+    //   if(!mayby_devices.ok())
+    //     continue;
+    //   auto devices = mayby_devices.valueOrDie();
+    //   for(auto &device : devices) {
+    //     log_info("Device found:" + std::to_string(device));
+    //   }
+    //   gpio_user_led_2.toggle();
+
+
+    // }
+  }
 }
 
 
@@ -95,7 +101,11 @@ void main_prog() {
   HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, "0.0.1");
+  // auto b = CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
+  // CoreDebug->DHCSR &= ~CoreDebug_DHCSR_C_DEBUGEN_Msk;
+  // auto a = CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
+
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, false, "0.0.1");
 
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
@@ -114,6 +124,7 @@ void main_prog() {
   // auto mayby_fdcan = se::FDCAN::Make(hfdcan1,sFilterConfig,nullptr,nullptr);
   // STMEPIC_ASSING_OR_HRESET(fdcan,mayby_fdcan);
   // fdcan->hardware_start();
+
 
   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
 

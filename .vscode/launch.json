@@ -35,7 +35,7 @@
       // This may need to be arm-none-eabi-gdb depending on your system
       "gdbPath": "arm-none-eabi-gdb",
       // Connect to an already running OpenOCD instance
-      "gdbTarget": "${input:remoteIP}:${input:remotePort}",
+      "gdbTarget": "${input:remoteIP}:${input:getPort}",
       //"runToMain": true,
       "runToEntryPoint": "main",
       // Work around for stopping at main on restart
