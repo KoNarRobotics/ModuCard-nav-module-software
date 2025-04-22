@@ -43,11 +43,7 @@
         "break main",
         "continue"
       ],
-      "preLaunchTask": "Start-Remote-OpenOCD",
-      "preLaunchTaskInputs": {
-        "remoteIP": "${input:remoteIP}",
-        "remotePort": "${input:remotePort}"
-      },
+      "preLaunchTask": "Start-Remote-OpenOCD"
     },
     {
       "cwd": "${workspaceFolder}",
@@ -106,11 +102,6 @@
       // "device":"STM32H750VBT6" ,
       // "svdFile": "${workspaceFolder}/STM32H750.svd",
       "serialNumber": "49FF6B064978785130411667"
-    }
-  ],
-  "setupCommands": [
-    {
-      "text": "set output-radix 2"
     }
   ],
   "inputs": [

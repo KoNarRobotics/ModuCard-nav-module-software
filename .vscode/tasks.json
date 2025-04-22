@@ -97,15 +97,15 @@
       "default": "10.10.0.6"
     },
     {
-      "id": "remotePort",
-      "type": "promptString",
-      "description": "Enter the port number for the gdb",
-      "default": "50000"
-    },
-    {
       "id": "stlinkID",
-      "type": "promptString",
+      "type": "pickString",
       "description": "Enter the ST-LINK ID to connect to",
+      "options": [
+        {
+          "label": "Nav module rev1",
+          "value": "49FF6B064978785130411667"
+        }
+      ],
       "default": "49FF6B064978785130411667"
     },
     {
