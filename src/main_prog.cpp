@@ -69,16 +69,24 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   while(1) {
     vTaskDelay(100);
     gpio_user_led_1.toggle();
-
-    auto mayby_devices = i2c1->scan_for_devices();
-    if(!mayby_devices.ok())
-      continue;
-    auto devices = mayby_devices.valueOrDie();
-    for(auto &device : devices) {
-      log_info("Device found:" + std::to_string(device));
+    auto get_data = bmp280->get_data();
+    if(get_data.ok()) {
+      auto data = get_data.valueOrDie();
+      log_info("BMP280: " + std::to_string(data.temp) + " " + std::to_string(data.pressure));
+    } else {
+      log_error("BMP280: " + get_data.status().to_string());
     }
-    gpio_user_led_2.toggle();
-  }
+
+  //   auto mayby_devices = i2c1->scan_for_devices();
+  //   if(!mayby_devices.ok())
+  //     continue;
+  //   auto devices = mayby_devices.valueOrDie();
+  //   for(auto &device : devices) {
+  //     log_info("Device found:" + std::to_string(device));
+  //   }
+  //   gpio_user_led_2.toggle();
+  // }
+}
 }
 
 
