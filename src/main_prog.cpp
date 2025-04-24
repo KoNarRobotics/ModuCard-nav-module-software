@@ -65,16 +65,28 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   bmp280->device_task_set_settings(settings);
   // bmp280->device_start();
   STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
+  bno055->device_task_set_settings(settings);
+  STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+
+
 
   while(1) {
     vTaskDelay(100);
     gpio_user_led_1.toggle();
-    auto get_data = bmp280->get_data();
-    if(get_data.ok()) {
-      auto data = get_data.valueOrDie();
-      log_info("BMP280: " + std::to_string(data.temp) + " " + std::to_string(data.pressure));
-    } else {
-      log_error("BMP280: " + get_data.status().to_string());
+    // auto get_data = bmp280->get_data();
+    // if(get_data.ok()) {
+    //   auto data = get_data.valueOrDie();
+    //   log_info("BMP280: " + std::to_string(data.temp) + " " + std::to_string(data.pressure));
+    // } else {
+    //   log_error("BMP280: " + get_data.status().to_string());
+    // }
+
+auto get_data1 = bno055->get_data();
+    if(get_data1.ok()) {
+      auto data = get_data1.valueOrDie();
+      log_info("BNO055: " + std::to_string(data.temp) + " " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " + std::to_string(data.acc.z));
+    
     }
 
   //   auto mayby_devices = i2c1->scan_for_devices();
