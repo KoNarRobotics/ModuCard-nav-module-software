@@ -7,7 +7,6 @@
 extern ADC_HandleTypeDef hadc1;
 extern DAC_HandleTypeDef hdac1;
 extern FDCAN_HandleTypeDef hfdcan1;
-extern FDCAN_HandleTypeDef hfdcan2;
 extern HRTIM_HandleTypeDef hhrtim;
 extern I2C_HandleTypeDef hi2c1;
 extern QSPI_HandleTypeDef hqspi;

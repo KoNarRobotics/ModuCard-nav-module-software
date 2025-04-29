@@ -4,14 +4,16 @@
 #include "simple_task.hpp"
 #include "fdcan.hpp"
 #include "BNO055.hpp"
-#include "BMP280.hpp"
+// #include "BMP280.hpp"
 #include "logger.hpp"
 namespace se = stmepic;
 
 
 std::shared_ptr<se::I2C> i2c1;
-std::shared_ptr<se::sensors::imu::BNO055> bno055       = nullptr;
-std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
+std::shared_ptr<se::sensors::imu::BNO055> bno055 = nullptr;
+// std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
+std::shared_ptr<se::FDCAN> fdcan = nullptr;
+
 se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_6);
 se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
 se::GpioPin gpio_boot_enable(*BOOT_EN_GPIO_Port, BOOT_EN_Pin);
@@ -61,25 +63,26 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   settings.uxPriority   = 2;
   settings.period       = 10;
 
-  STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
-  bmp280->device_task_set_settings(settings);
+  // STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
+  // bmp280->device_task_set_settings(settings);
   // bmp280->device_start();
-  STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
-
+  // STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+  se::CanDataFrame frame;
+  frame.extended_id    = true;
+  frame.frame_id       = 0x123;
+  frame.data[0]        = 0;
+  frame.data_size      = 1;
+  frame.remote_request = false;
   while(1) {
     vTaskDelay(100);
     gpio_user_led_1.toggle();
-    auto get_data = bmp280->get_data();
-    if(get_data.ok()) {
-      auto data = get_data.valueOrDie();
-      log_info("BMP280: Temp:" + std::to_string(data.temp) + " hP:" + std::to_string(data.pressure));
-    } else {
-      log_error("BMP280: " + get_data.status().to_string());
-    }
-
-    if(CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) {
-      gpio_user_led_2.toggle();
-    }
+    // auto get_data = bmp280->get_data();
+    // if(get_data.ok()) {
+    //   auto data = get_data.valueOrDie();
+    //   log_info("BMP280: Temp:" + std::to_string(data.temp) + " hP:" + std::to_string(data.pressure));
+    // } else {
+    //   log_error("BMP280: " + get_data.status().to_string());
+    // }
 
     //   auto mayby_devices = i2c1->scan_for_devices();
     //   if(!mayby_devices.ok())
@@ -90,9 +93,18 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     //   }
     //   gpio_user_led_2.toggle();
 
-
+    fdcan->write(frame);
+    frame.data[0]++;
+    log_debug(frame.to_string());
     // }
   }
+}
+
+
+void can_callback(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)can;
+  (void)args;
+  log_debug(msg.to_string());
 }
 
 
@@ -101,11 +113,7 @@ void main_prog() {
   HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
 
-  // auto b = CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
-  // CoreDebug->DHCSR &= ~CoreDebug_DHCSR_C_DEBUGEN_Msk;
-  // auto a = CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk;
-
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, false, "0.0.1");
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, "0.0.1");
 
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
@@ -120,10 +128,19 @@ void main_prog() {
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
   task_blink.task_run();
 
-  // FDCAN_FilterTypeDef sFilterConfig;
-  // auto mayby_fdcan = se::FDCAN::Make(hfdcan1,sFilterConfig,nullptr,nullptr);
-  // STMEPIC_ASSING_OR_HRESET(fdcan,mayby_fdcan);
-  // fdcan->hardware_start();
+  FDCAN_FilterTypeDef sFilterConfig = {};
+  sFilterConfig.IdType              = FDCAN_EXTENDED_ID;
+  sFilterConfig.FilterIndex         = 0;
+  sFilterConfig.FilterType          = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig        = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfig.FilterID1           = 0;
+  sFilterConfig.FilterID2           = 0;
+  sFilterConfig.RxBufferIndex       = 0;
+  sFilterConfig.IsCalibrationMsg    = 0;
+
+  STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, sFilterConfig, nullptr, nullptr));
+  STMEPIC_NONE_OR_HRESET(fdcan->add_callback(0x0, can_callback));
+  STMEPIC_NONE_OR_HRESET(fdcan->hardware_reset());
 
 
   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
