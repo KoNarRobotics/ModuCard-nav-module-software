@@ -95,7 +95,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
     fdcan->write(frame);
     frame.data[0]++;
-    log_debug(frame.to_string());
+    // log_debug(frame.to_string());
     // }
   }
 }
@@ -133,8 +133,8 @@ void main_prog() {
   sFilterConfig.FilterIndex         = 0;
   sFilterConfig.FilterType          = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig        = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1           = 0;
-  sFilterConfig.FilterID2           = 0;
+  sFilterConfig.FilterID1           = 0x915;
+  sFilterConfig.FilterID2           = 0x1FFFFFFF; // all have to match
   sFilterConfig.RxBufferIndex       = 0;
   sFilterConfig.IsCalibrationMsg    = 0;
 
