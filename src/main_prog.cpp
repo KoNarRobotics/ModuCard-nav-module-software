@@ -133,14 +133,24 @@ void main_prog() {
   sFilterConfig.FilterIndex         = 0;
   sFilterConfig.FilterType          = FDCAN_FILTER_MASK;
   sFilterConfig.FilterConfig        = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1           = 0x915;
-  sFilterConfig.FilterID2           = 0x1FFFFFFF; // all have to match
+  sFilterConfig.FilterID1           = 0; // 0x915;
+  sFilterConfig.FilterID2           = 0; // 0x1FFFFFFF; // all have to match
   sFilterConfig.RxBufferIndex       = 0;
   sFilterConfig.IsCalibrationMsg    = 0;
 
-  STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, sFilterConfig, nullptr, nullptr));
+  se::FDcanFilterConfig filter_config;
+  filter_config.filters.push_back(sFilterConfig);
+  filter_config.fifo_number                  = se::FDCAN_FIFO::FDCAN_FIFO0;
+  filter_config.globalFilter_NonMatchingStd  = FDCAN_REJECT;
+  filter_config.globalFilter_NonMatchingExt  = FDCAN_REJECT;
+  filter_config.globalFilter_RejectRemoteStd = FDCAN_REJECT_REMOTE;
+  filter_config.globalFilter_RejectRemoteExt = FDCAN_REJECT_REMOTE;
+
+
+  STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, filter_config, nullptr, nullptr));
   STMEPIC_NONE_OR_HRESET(fdcan->add_callback(0x0, can_callback));
-  STMEPIC_NONE_OR_HRESET(fdcan->hardware_reset());
+  fdcan->hardware_start();
+  // STMEPIC_NONE_OR_HRESET(fdcan->hardware_reset());
 
 
   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
