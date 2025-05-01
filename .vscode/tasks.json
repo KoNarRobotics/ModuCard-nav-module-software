@@ -75,10 +75,10 @@
       "type": "pickString",
       "description": "Enter the username for the remote machine",
       "options": [
-        "nomad",
+        "ubuntu",
         "orangepi"
       ],
-      "default": "orangepi"
+      "default": "ubuntu"
     },
     {
       "id": "remoteIP",

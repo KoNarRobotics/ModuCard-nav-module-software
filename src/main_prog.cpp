@@ -3,16 +3,16 @@
 #include "Timing.hpp"
 #include "simple_task.hpp"
 #include "fdcan.hpp"
-#include "BNO055.hpp"
-// #include "BMP280.hpp"
+// #include "BNO055.hpp"
+#include "BMP280.hpp"
 #include "logger.hpp"
-namespace se = stmepic;
+#include "can_messages.h"
 
 
 std::shared_ptr<se::I2C> i2c1;
-std::shared_ptr<se::sensors::imu::BNO055> bno055 = nullptr;
-// std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
-std::shared_ptr<se::FDCAN> fdcan = nullptr;
+// std::shared_ptr<se::sensors::imu::BNO055> bno055       = nullptr;
+std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
+std::shared_ptr<se::FDCAN> fdcan                       = nullptr;
 
 se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_6);
 se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
@@ -63,10 +63,14 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   settings.uxPriority   = 2;
   settings.period       = 10;
 
-  // STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
-  // bmp280->device_task_set_settings(settings);
-  // bmp280->device_start();
-  // STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+  STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
+  bmp280->device_task_set_settings(settings);
+  bmp280->device_start();
+  STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+
+  fdcan->add_callback(CAN_MESSAGES_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
+  fdcan->add_callback(CAN_MESSAGES_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
+
   se::CanDataFrame frame;
   frame.extended_id    = true;
   frame.frame_id       = 0x123;
@@ -104,7 +108,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 void can_callback(se::CanBase &can, se::CanDataFrame &msg, void *args) {
   (void)can;
   (void)args;
-  log_debug(msg.to_string());
+  // log_debug(msg.to_string());
 }
 
 
@@ -121,9 +125,8 @@ void main_prog() {
 
 
   // STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
-  // bno055->device_task_set_settings(settings);
+  // // bno055->device_task_set_settings(settings);
   // STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
-  // printf("Semihosting test\n");
 
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
   task_blink.task_run();
@@ -143,12 +146,12 @@ void main_prog() {
   filter_config.fifo_number                  = se::FDCAN_FIFO::FDCAN_FIFO0;
   filter_config.globalFilter_NonMatchingStd  = FDCAN_REJECT;
   filter_config.globalFilter_NonMatchingExt  = FDCAN_REJECT;
-  filter_config.globalFilter_RejectRemoteStd = FDCAN_REJECT_REMOTE;
-  filter_config.globalFilter_RejectRemoteExt = FDCAN_REJECT_REMOTE;
+  filter_config.globalFilter_RejectRemoteStd = FDCAN_FILTER_REMOTE;
+  filter_config.globalFilter_RejectRemoteExt = FDCAN_FILTER_REMOTE;
 
 
   STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, filter_config, nullptr, nullptr));
-  STMEPIC_NONE_OR_HRESET(fdcan->add_callback(0x0, can_callback));
+  // STMEPIC_NONE_OR_HRESET(fdcan->add_callback(0x0, can_callback));
   fdcan->hardware_start();
   // STMEPIC_NONE_OR_HRESET(fdcan->hardware_reset());
 
