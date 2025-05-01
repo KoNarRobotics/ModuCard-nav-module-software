@@ -80,27 +80,6 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   while(1) {
     vTaskDelay(100);
     gpio_user_led_1.toggle();
-    // auto get_data = bmp280->get_data();
-    // if(get_data.ok()) {
-    //   auto data = get_data.valueOrDie();
-    //   log_info("BMP280: Temp:" + std::to_string(data.temp) + " hP:" + std::to_string(data.pressure));
-    // } else {
-    //   log_error("BMP280: " + get_data.status().to_string());
-    // }
-
-    //   auto mayby_devices = i2c1->scan_for_devices();
-    //   if(!mayby_devices.ok())
-    //     continue;
-    //   auto devices = mayby_devices.valueOrDie();
-    //   for(auto &device : devices) {
-    //     log_info("Device found:" + std::to_string(device));
-    //   }
-    //   gpio_user_led_2.toggle();
-
-    fdcan->write(frame);
-    frame.data[0]++;
-    // log_debug(frame.to_string());
-    // }
   }
 }
 
@@ -151,25 +130,7 @@ void main_prog() {
 
 
   STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, filter_config, nullptr, nullptr));
-  // STMEPIC_NONE_OR_HRESET(fdcan->add_callback(0x0, can_callback));
   fdcan->hardware_start();
-  // STMEPIC_NONE_OR_HRESET(fdcan->hardware_reset());
-
-
-  HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
-
-  // while(true) {
-  //   HAL_GPIO_TogglePin(USER_LED_1_GPIO_Port, USER_LED_1_Pin);
-  //   HAL_GPIO_TogglePin(USER_LED_2_GPIO_Port, USER_LED_2_Pin);
-  //   HAL_Delay(100);
-  //   se::CanDataFrame frame;
-  //   frame.extended_id    = false;
-  //   frame.frame_id       = 0x123;
-  //   frame.data[0]        = 0x12;
-  //   frame.remote_request = false;
-  //   // fdcan->write(frame);
-  // }
-
 
   // se::Ticker::get_instance().init(&htim6);
 
