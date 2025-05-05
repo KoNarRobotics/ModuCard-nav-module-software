@@ -68,8 +68,8 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   bmp280->device_start();
   STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
 
-  fdcan->add_callback(CAN_MESSAGES_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
-  fdcan->add_callback(CAN_MESSAGES_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
+  fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
+  fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
 
   se::CanDataFrame frame;
   frame.extended_id    = true;

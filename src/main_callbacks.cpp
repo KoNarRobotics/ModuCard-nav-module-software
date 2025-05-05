@@ -13,19 +13,19 @@ namespace se = stmepic;
 void can_callback_bmp280_get_status(se::CanBase &can, se::CanDataFrame &msg, void *args) {
 
   auto bmp280 = static_cast<se::sensors::barometer::BMP280 *>(args);
-  can_messages_barometer_status_t status;
+  can_barometer_status_t status;
   auto stat = bmp280->device_get_status();
   if(stat.ok()) {
-    status.status = CAN_MESSAGES_BAROMETER_STATUS_STATUS_OK_CHOICE;
+    status.status = CAN_BAROMETER_STATUS_STATUS_OK_CHOICE;
   } else {
-    status.status = CAN_MESSAGES_BAROMETER_STATUS_STATUS_ERROR_CHOICE;
+    status.status = CAN_BAROMETER_STATUS_STATUS_ERROR_CHOICE;
   }
   se::CanDataFrame frame;
-  frame.extended_id    = CAN_MESSAGES_BAROMETER_STATUS_IS_EXTENDED;
-  frame.frame_id       = CAN_MESSAGES_BAROMETER_STATUS_FRAME_ID;
-  frame.data_size      = CAN_MESSAGES_BAROMETER_STATUS_LENGTH;
+  frame.extended_id    = CAN_BAROMETER_STATUS_IS_EXTENDED;
+  frame.frame_id       = CAN_BAROMETER_STATUS_FRAME_ID;
+  frame.data_size      = CAN_BAROMETER_STATUS_LENGTH;
   frame.remote_request = false;
-  can_messages_barometer_status_pack(frame.data, &status, frame.data_size);
+  can_barometer_status_pack(frame.data, &status, frame.data_size);
   (void)can.write(frame);
 }
 
@@ -39,14 +39,14 @@ void can_callback_bmp280_get_data(se::CanBase &can, se::CanDataFrame &msg, void 
   }
 
   auto data_value = data.valueOrDie();
-  can_messages_barometer_data_t status;
+  can_barometer_data_t status;
   status.temperature = data_value.temp;
   status.pressure    = data_value.pressure;
   se::CanDataFrame frame;
-  frame.extended_id    = CAN_MESSAGES_BAROMETER_DATA_IS_EXTENDED;
-  frame.frame_id       = CAN_MESSAGES_BAROMETER_DATA_FRAME_ID;
-  frame.data_size      = CAN_MESSAGES_BAROMETER_DATA_LENGTH;
+  frame.extended_id    = CAN_BAROMETER_DATA_IS_EXTENDED;
+  frame.frame_id       = CAN_BAROMETER_DATA_FRAME_ID;
+  frame.data_size      = CAN_BAROMETER_DATA_LENGTH;
   frame.remote_request = false;
-  can_messages_barometer_data_pack(frame.data, &status, frame.data_size);
+  can_barometer_data_pack(frame.data, &status, frame.data_size);
   (void)can.write(frame);
 }
