@@ -46,6 +46,7 @@ add_executable(${CMAKE_PROJECT_NAME})
 
 
 set(STMEPIC_FDCAN ON)
+# set(STMEPIC_GENERATE_DOCS ON)
 
 add_subdirectory(src/StmEpic)
 
