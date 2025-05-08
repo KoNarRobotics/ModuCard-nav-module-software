@@ -4,13 +4,8 @@
 
 #include "main.h"
 
-extern ADC_HandleTypeDef hadc1;
-extern DAC_HandleTypeDef hdac1;
 extern FDCAN_HandleTypeDef hfdcan1;
-extern HRTIM_HandleTypeDef hhrtim;
 extern I2C_HandleTypeDef hi2c1;
-extern QSPI_HandleTypeDef hqspi;
-extern SPI_HandleTypeDef hspi1;
-extern TIM_HandleTypeDef htim2;
+extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim6;
 extern UART_HandleTypeDef huart4;

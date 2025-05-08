@@ -53,8 +53,8 @@
       "type": "cortex-debug",
       "servertype": "openocd",
       "configFiles": [
-        "${workspaceFolder}/stlink.cfg",
-        "${workspaceFolder}/stm32h7x.cfg"
+        "${workspaceFolder}/stlink-dap.cfg",
+        "${workspaceFolder}/stm32h5x.cfg"
       ],
       "serverArgs": [
         "-c",
@@ -62,7 +62,7 @@
       ],
       "runToEntryPoint": "main",
       // "showDevDebugOutput": "both",
-      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      "svdFile": "${workspaceFolder}/STM32H563.svd",
       "serialNumber": "49FF6B064978785130411667",
       "breakAfterReset": false
     },
@@ -75,7 +75,7 @@
       "servertype": "openocd",
       "configFiles": [
         "${workspaceFolder}/stlink.cfg",
-        "${workspaceFolder}/stm32h7x.cfg"
+        "${workspaceFolder}/stm32h5x.cfg"
       ],
       "runToEntryPoint": "main",
       "showDevDebugOutput": "both",

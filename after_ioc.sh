@@ -42,6 +42,10 @@ if [ -f $main_file ]; then
     sed -i 's|\.\./\.\./Core/Src/main\.c|../../Core/Src/main.cpp|' $cmake_file
   fi
 
+
+  # Remove the line containing MX_FREERTOS_Init();
+  sed -i '/MX_FREERTOS_Init();/d' $main_file_cpp
+
   # Remove the line containing "../../Core/Src/syscalls.c" from the CMake file
   sed -i '/\.\.\/\.\.\/Core\/Src\/syscalls\.c/d' $cmake_file
 

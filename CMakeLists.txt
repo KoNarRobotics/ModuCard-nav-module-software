@@ -30,7 +30,7 @@ include("cmake/gcc-arm-none-eabi.cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Enable CMake support for ASM and C languages
-enable_language(C ASM)
+enable_language(CXX C ASM)
 
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
@@ -41,6 +41,7 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
+
 
 
 
