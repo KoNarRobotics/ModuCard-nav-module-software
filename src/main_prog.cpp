@@ -103,6 +103,11 @@ void main_prog() {
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
   i2c1->hardware_reset();
 
+  std::shared_ptr<std::vector<int>> ia = nullptr;
+  ia                                   = std::make_shared<std::vector<int>>(10);
+  for(int i = 0; i < 10; i++) {
+    ia->at(i) = i;
+  }
 
   STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
   // bno055->device_task_set_settings(settings);
@@ -132,9 +137,4 @@ void main_prog() {
 
   STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, filter_config, nullptr, nullptr));
   fdcan->hardware_start();
-
-  // se::Ticker::get_instance().init(&htim6);
-
-  // Your code here like your tasks, drivers, etc.
-  // Do not start FreeRTOS kernel here since it will be start later in main.cpp
 }

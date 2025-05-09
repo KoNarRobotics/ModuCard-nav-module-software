@@ -49,20 +49,20 @@ add_executable(${CMAKE_PROJECT_NAME})
 set(STMEPIC_FDCAN ON)
 # set(STMEPIC_GENERATE_DOCS ON)
 
-set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}" )
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -u_printf_float -Wreturn-type -ffunction-sections -fdata-sections " )
+# set(CMAKE_ASM_FLAGS "${CMAKE_C_FLAGS}" )
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -u_printf_float -Wreturn-type -ffunction-sections -fdata-sections " )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -u_printf_float -Wreturn-type -ffunction-sections -fdata-sections -fno-exceptions " )
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -u_printf_float -Wreturn-type -ffunction-sections -fdata-sections -fno-exceptions " )
 
-# additional linker flags
+# # additional linker flags
 
-set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}  -u_printf_float -Wreturn-type -print-memory-usage -lrdimon --specs=rdimon.specs" )
-# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} ")
+# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS}  -u_printf_float -Wreturn-type -print-memory-usage -lrdimon --specs=rdimon.specs" )
+# # set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} ")
 
 
-set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}  -u_printf_float -Wreturn-type -Wl,--gc-sections -lrdimon --specs=rdimon.specs" )
+# set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}  -u_printf_float -Wreturn-type -Wl,--gc-sections -lrdimon --specs=rdimon.specs" )
 
-set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,-Map=firmware.map")
+# set(CMAKE_C_LINK_FLAGS "${CMAKE_C_LINK_FLAGS} -Wl,-Map=firmware.map")
 
 add_subdirectory(src/StmEpic)
 
