@@ -48,7 +48,7 @@
       "args": [
         "-t", // Force pseudo-terminal allocation
         "${input:remoteUser}@${input:remoteIP}",
-        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:getPort}\" -f interface/stlink.cfg -f target/stm32h7x.cfg -c \"hla_serial ${input:stlinkID}\" -c \"init; arm semihosting enable\"'"
+        "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:getPort}\" -f interface/stlink-dap.cfg -f target/stm32h5x.cfg -c \"hla_serial ${input:stlinkID}\" -c \"init; arm semihosting enable\"'"
       ],
       "isBackground": true, // run task in backgound
       "problemMatcher": {
@@ -104,9 +104,13 @@
         {
           "label": "Nav module rev1",
           "value": "49FF6B064978785130411667"
+        },
+        {
+          "label": "Nav module rev2",
+          "value": "49FF6D064978785146441667"
         }
       ],
-      "default": "49FF6B064978785130411667"
+      "default": "49FF6D064978785146441667"
     },
     {
       "id": "getPort",

@@ -63,6 +63,10 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   settings.uxPriority   = 2;
   settings.period       = 10;
 
+  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
+  bno055->device_task_set_settings(settings);
+  STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+
   STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
   bmp280->device_task_set_settings(settings);
   bmp280->device_start();
@@ -71,12 +75,6 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
   fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
 
-  se::CanDataFrame frame;
-  frame.extended_id    = true;
-  frame.frame_id       = 0x123;
-  frame.data[0]        = 0;
-  frame.data_size      = 1;
-  frame.remote_request = false;
   while(1) {
     vTaskDelay(100);
     gpio_user_led_1.toggle();
@@ -109,9 +107,6 @@ void main_prog() {
     ia->at(i) = i;
   }
 
-  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
-  // bno055->device_task_set_settings(settings);
-  STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
 
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
   task_blink.task_run();
