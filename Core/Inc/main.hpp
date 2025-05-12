@@ -6,6 +6,8 @@
 
 extern FDCAN_HandleTypeDef hfdcan1;
 extern I2C_HandleTypeDef hi2c1;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim6;
 extern UART_HandleTypeDef huart4;

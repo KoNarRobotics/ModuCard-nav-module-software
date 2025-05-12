@@ -20,6 +20,7 @@ endif()
 
 # Set the project name
 set(CMAKE_PROJECT_NAME ModuCard_nav_module)
+set(PROJECT_MAJOR_VERSION 0)
 
 
 
@@ -111,11 +112,12 @@ endif()
 
 
 add_custom_command(
-    TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf firmware.bin
-    COMMAND ${CMAKE_OBJCOPY} -O ihex ${CMAKE_PROJECT_NAME}.elf firmware.hex
-    COMMAND ${CMAKE_SIZE} ${CMAKE_PROJECT_NAME}.elf
+  TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_OBJCOPY} -O binary ${CMAKE_PROJECT_NAME}.elf firmware.bin
+  COMMAND ${CMAKE_OBJCOPY} -O ihex ${CMAKE_PROJECT_NAME}.elf firmware.hex
+  COMMAND ${CMAKE_SIZE} ${CMAKE_PROJECT_NAME}.elf
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_NAME}.elf firmware.elf
+  COMMAND ${CMAKE_SOURCE_DIR}/scripts/update-software-version.sh ${CMAKE_SOURCE_DIR} ${PROJECT_MAJOR_VERSION}
   # Show ccache statistics
  )
  

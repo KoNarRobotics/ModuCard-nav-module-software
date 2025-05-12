@@ -1,5 +1,6 @@
 #pragma once
 #include "main.hpp"
+#include "version.hpp"
 #include "stmepic.hpp"
 #include "fdcan.hpp"
 

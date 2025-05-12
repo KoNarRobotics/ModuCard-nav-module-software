@@ -18,7 +18,7 @@ se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_8);
 se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
 se::GpioPin gpio_boot_enable(*BOOT_EN_GPIO_Port, BOOT_EN_Pin);
 se::GpioPin gpio_imu_nreset(*IMU_EXT_NRESET_GPIO_Port, IMU_EXT_NRESET_Pin);
-se::GpioPin gpio_imu_exinterupt(*IMU_INT_GPIO_Port, IMU_INT_Pin);
+se::GpioPin gpio_imu_interrupt(*IMU_INT_GPIO_Port, IMU_INT_Pin);
 
 se::GpioPin gpio_user_led_1(*USER_LED_1_GPIO_Port, USER_LED_1_Pin);
 se::GpioPin gpio_user_led_2(*USER_LED_2_GPIO_Port, USER_LED_2_Pin);
@@ -52,8 +52,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
 se::SimpleTask task_blink;
 
+#define IMU_ICM_20948 0x69
+
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
-  gpio_imu_nreset.write(1);
+  // gpio_imu_nreset.write(1);
   gpio_user_led_1.write(0);
   gpio_user_led_2.write(0);
   se::Status stat = se::Status::OK();
@@ -77,6 +79,17 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
   while(1) {
     vTaskDelay(100);
+
+    // auto state      = i2c1->is_device_ready(IMU_ICM_20948, 1, 100);
+    uint8_t data[1] = { 0 };
+    auto st1        = i2c1->write(IMU_ICM_20948, 0x7F, data, 1); // write to bank 0
+    auto state2     = i2c1->read(IMU_ICM_20948, 0x00, data, 1);
+
+    log_debug("IMU state: " + state2.to_string());
+    auto se = bmp280->get_data();
+    log_debug("BARO pres: " + std::to_string(se.valueOrDie().pressure));
+
+
     gpio_user_led_1.toggle();
     gpio_status_led.toggle();
   }
@@ -94,11 +107,12 @@ void main_prog() {
   HAL_NVIC_SetPriority(TIM6_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(TIM6_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
+  std::string version =
+  std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, version);
 
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, "0.0.1");
 
-
-  STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::IT));
+  STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
   i2c1->hardware_reset();
 
   std::shared_ptr<std::vector<int>> ia = nullptr;

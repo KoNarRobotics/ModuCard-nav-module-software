@@ -56,6 +56,8 @@
 
 /* External variables --------------------------------------------------------*/
 extern FDCAN_HandleTypeDef hfdcan1;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel3;
+extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern I2C_HandleTypeDef hi2c1;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim7;
@@ -161,6 +163,34 @@ void DebugMon_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h5xx.s).                    */
 /******************************************************************************/
+
+/**
+  * @brief This function handles GPDMA1 Channel 2 global interrupt.
+  */
+void GPDMA1_Channel2_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA1_Channel2_IRQn 0 */
+
+  /* USER CODE END GPDMA1_Channel2_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA1_Channel2);
+  /* USER CODE BEGIN GPDMA1_Channel2_IRQn 1 */
+
+  /* USER CODE END GPDMA1_Channel2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles GPDMA1 Channel 3 global interrupt.
+  */
+void GPDMA1_Channel3_IRQHandler(void)
+{
+  /* USER CODE BEGIN GPDMA1_Channel3_IRQn 0 */
+
+  /* USER CODE END GPDMA1_Channel3_IRQn 0 */
+  HAL_DMA_IRQHandler(&handle_GPDMA1_Channel3);
+  /* USER CODE BEGIN GPDMA1_Channel3_IRQn 1 */
+
+  /* USER CODE END GPDMA1_Channel3_IRQn 1 */
+}
 
 /**
   * @brief This function handles FDCAN1 interrupt 0.
