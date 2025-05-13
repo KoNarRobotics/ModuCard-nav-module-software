@@ -7,11 +7,13 @@
 #include "BMP280.hpp"
 #include "logger.hpp"
 #include "can_messages.h"
+#include "ICM20948.hpp"
 
 
 std::shared_ptr<se::I2C> i2c1;
 std::shared_ptr<se::sensors::imu::BNO055> bno055       = nullptr;
 std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
+std::shared_ptr<se::sensors::imu::ICM20948> icm20948   = nullptr;
 std::shared_ptr<se::FDCAN> fdcan                       = nullptr;
 
 se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_8);
@@ -54,6 +56,7 @@ se::SimpleTask task_blink;
 
 #define IMU_ICM_20948 0x69
 
+
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // gpio_imu_nreset.write(1);
   gpio_user_led_1.write(0);
@@ -65,9 +68,15 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   settings.uxPriority   = 2;
   settings.period       = 10;
 
-  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1, nullptr, nullptr));
+  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1));
   bno055->device_task_set_settings(settings);
   STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+
+
+  // STMEPIC_ASSING_TO_OR_HRESET(icm20948, se::sensors::imu::ICM20948::Make(i2c1,
+  // se::sensors::imu::internal::ICM20948_I2C_ADDRESS_2)); icm20948->device_task_set_settings(settings);
+  // STMEPIC_NONE_OR_HRESET(icm20948->device_task_start());
+
 
   STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
   bmp280->device_task_set_settings(settings);
@@ -80,16 +89,23 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   while(1) {
     vTaskDelay(100);
 
-    // auto state      = i2c1->is_device_ready(IMU_ICM_20948, 1, 100);
-    uint8_t data[1] = { 0 };
-    auto st1        = i2c1->write(IMU_ICM_20948, 0x7F, data, 1); // write to bank 0
-    auto state2     = i2c1->read(IMU_ICM_20948, 0x00, data, 1);
+    // auto state = i2c1->is_device_ready(0x28, 1, 100);
+    // uint8_t data[1] = { 0 };
+    // auto st1        = i2c1->write(IMU_ICM_20948, 0x7F, data, 1); // write to bank 0
+    // auto state2     = i2c1->read(IMU_ICM_20948, 0x00, data, 1);
 
-    log_debug("IMU state: " + state2.to_string());
-    auto se = bmp280->get_data();
-    log_debug("BARO pres: " + std::to_string(se.valueOrDie().pressure));
-
-
+    // log_debug("IMU state: " + state2.to_string());
+    // auto se = bmp280->get_data();
+    // log_debug("BARO pres: " + std::to_string(se.valueOrDie().pressure));
+    // auto i2c_devices = i2c1->scan_for_devices();
+    // if(!i2c_devices.ok()) {
+    //   log_error("I2C scan error: " + i2c_devices.status().to_string());
+    // } else {
+    //   log_debug("I2C scan result: " + std::to_string(i2c_devices.valueOrDie().size()));
+    //   for(auto &device : i2c_devices.valueOrDie()) {
+    //     log_debug("I2C device: " + std::to_string(device));
+    //   }
+    // }
     gpio_user_led_1.toggle();
     gpio_status_led.toggle();
   }

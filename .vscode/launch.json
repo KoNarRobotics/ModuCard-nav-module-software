@@ -69,17 +69,21 @@
     {
       "cwd": "${workspaceFolder}",
       "executable": "${workspaceFolder}/build/firmware.elf",
-      "name": "Attach OpenOCD",
+      "name": "Local Attach OpenOCD",
       "request": "attach",
       "type": "cortex-debug",
       "servertype": "openocd",
       "configFiles": [
-        "${workspaceFolder}/stlink.cfg",
+        "${workspaceFolder}/stlink-dap.cfg",
         "${workspaceFolder}/stm32h5x.cfg"
       ],
+      "serverArgs": [
+        "-c",
+        "init; arm semihosting enable"
+      ],
       "runToEntryPoint": "main",
-      "showDevDebugOutput": "both",
-      "svdFile": "${workspaceFolder}/STM32H750.svd",
+      // "showDevDebugOutput": "both",
+      "svdFile": "${workspaceFolder}/STM32H563.svd",
       "serialNumber": "49FF6D064978785146441667",
       "breakAfterReset": false
     },
