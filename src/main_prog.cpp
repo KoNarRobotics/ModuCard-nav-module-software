@@ -64,11 +64,13 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   se::Status stat = se::Status::OK();
 
   se::DeviceThreadedSettings settings;
-  settings.uxStackDepth = 512;
+  settings.uxStackDepth = 1024;
   settings.uxPriority   = 2;
   settings.period       = 10;
+  se::sensors::imu::BNO0055_Settings bno055_settings;
 
   STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1));
+  bno055->device_set_settings(bno055_settings);
   bno055->device_task_set_settings(settings);
   STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
 
@@ -106,6 +108,19 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     //     log_debug("I2C device: " + std::to_string(device));
     //   }
     // }
+    auto a = bno055->get_data();
+    if(a.ok()) {
+      auto d    = bno055->get_calibration_data();
+      auto data = a.valueOrDie();
+      log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
+                std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
+                std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
+                std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
+                "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
+    } else {
+      log_error("IMU error: " + a.status().to_string());
+    }
+
     gpio_user_led_1.toggle();
     gpio_status_led.toggle();
   }
@@ -138,7 +153,7 @@ void main_prog() {
   }
 
 
-  task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 600);
+  task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 2500);
   task_blink.task_run();
 
   FDCAN_FilterTypeDef sFilterConfig = {};

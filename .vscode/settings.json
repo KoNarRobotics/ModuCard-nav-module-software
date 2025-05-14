@@ -71,7 +71,8 @@
     "istream": "cpp",
     "sstream": "cpp",
     "variant": "cpp",
-    "source_location": "c"
+    "source_location": "c",
+    "complex": "cpp"
   },
   "editor.formatOnSave": true,
   "python.autoComplete.extraPaths": [
@@ -82,7 +83,7 @@
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages"
   ],
-  "cortex-debug.variableUseNaturalFormat": false,
+  "cortex-debug.variableUseNaturalFormat": true,
   "ros.distro": "jazzy",
   // "cortex-debug.gdbPath": "gdb-multiarch"
 }
