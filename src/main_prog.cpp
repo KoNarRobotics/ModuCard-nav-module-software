@@ -134,12 +134,12 @@ void main_prog() {
   HAL_TIM_Base_Start_IT(&htim6);
   // MX_USB_PCD_Init();
 
-  // MX_USB_DEVICE_Init();
+  // MX_USB_Device_Init();
 
   std::string version =
   std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
   // CDC_Transmit_FS
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, version);
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, false, version);
 
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));

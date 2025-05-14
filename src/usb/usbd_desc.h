@@ -1,42 +1,139 @@
-#pragma once
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           USB_Device/CDC_Standalone/USB_Device/App/usbd_desc.h
+  * @author         MCD Application Team
+  * @brief          Header for usbd_desc.c file.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __USBD_DESC__C__
+#define __USBD_DESC__C__
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_def.h"
 
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/*
- * User to provide a unique ID to define the USB device serial number
- * The use of UID_BASE register can be considered as an example
- */
-#define DEVICE_ID1 (UID_BASE)
-#define DEVICE_ID2 (UID_BASE + 0x4U)
-#define DEVICE_ID3 (UID_BASE + 0x8U)
+/* USER CODE BEGIN INCLUDE */
 
-/*
- * USB Billboard Class USER string desc Defines Template
- * index should start form 0x10 to avoid using the reserved device string desc indexes
- */
-#if(USBD_CLASS_USER_STRING_DESC == 1)
-#define USBD_BB_IF_STRING_INDEX 0x10U
-#define USBD_BB_URL_STRING_INDEX 0x11U
-#define USBD_BB_ALTMODE0_STRING_INDEX 0x12U
-#define USBD_BB_ALTMODE1_STRING_INDEX 0x13U
-/* Add Specific USER string Desc */
-#define USBD_BB_IF_STR_DESC (uint8_t *)"STM32 BillBoard Interface"
-#define USBD_BB_URL_STR_DESC (uint8_t *)"www.st.com"
-#define USBD_BB_ALTMODE0_STR_DESC (uint8_t *)"STM32 Alternate0 Mode"
-#define USBD_BB_ALTMODE1_STR_DESC (uint8_t *)"STM32 Alternate1 Mode"
-#endif /* USBD_CLASS_USER_STRING_DESC  */
+/* USER CODE END INCLUDE */
 
-#define USB_SIZ_STRING_SERIAL 0x1AU
 
-#if(USBD_LPM_ENABLED == 1)
-#define USB_SIZ_BOS_DESC 0x0CU
-#elif(USBD_CLASS_BOS_ENABLED == 1)
-#define USB_SIZ_BOS_DESC 0x5DU
-#endif /* USBD_LPM_ENABLED  */
+/** @defgroup USBD_DESC USBD_DESC
+  * @brief Usb device descriptors module.
+  * @{
+  */
 
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
-extern USBD_DescriptorsTypeDef Class_Desc; /* Replace 'XXX_Desc' with your active USB device class, ex: HID_Desc */
+/** @defgroup USBD_DESC_Exported_Constants USBD_DESC_Exported_Constants
+  * @brief Constants.
+  * @{
+  */
+#define         DEVICE_ID1          (UID_BASE)
+#define         DEVICE_ID2          (UID_BASE + 0x4)
+#define         DEVICE_ID3          (UID_BASE + 0x8)
+
+#define         USB_SIZ_STRING_SERIAL       0x1A
+
+/* USER CODE BEGIN EXPORTED_CONSTANTS */
+
+/* USER CODE END EXPORTED_CONSTANTS */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_Defines USBD_DESC_Exported_Defines
+  * @brief Defines.
+  * @{
+  */
+
+/* USER CODE BEGIN EXPORTED_DEFINES */
+
+/* USER CODE END EXPORTED_DEFINES */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_TypesDefinitions USBD_DESC_Exported_TypesDefinitions
+  * @brief Types.
+  * @{
+  */
+
+/* USER CODE BEGIN EXPORTED_TYPES */
+
+/* USER CODE END EXPORTED_TYPES */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_Macros USBD_DESC_Exported_Macros
+  * @brief Aliases.
+  * @{
+  */
+
+/* USER CODE BEGIN EXPORTED_MACRO */
+
+/* USER CODE END EXPORTED_MACRO */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_Variables USBD_DESC_Exported_Variables
+  * @brief Public variables.
+  * @{
+  */
+
+extern USBD_DescriptorsTypeDef     CDC_Desc;
+
+/* USER CODE BEGIN EXPORTED_VARIABLES */
+
+/* USER CODE END EXPORTED_VARIABLES */
+
+/**
+  * @}
+  */
+
+/** @defgroup USBD_DESC_Exported_FunctionsPrototype USBD_DESC_Exported_FunctionsPrototype
+  * @brief Public functions declaration.
+  * @{
+  */
+
+/* USER CODE BEGIN EXPORTED_FUNCTIONS */
+
+/* USER CODE END EXPORTED_FUNCTIONS */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __USBD_DESC__C__ */

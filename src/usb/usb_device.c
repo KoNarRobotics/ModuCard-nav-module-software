@@ -1,30 +1,78 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file    USB_Device/CDC_Standalone/USB_Device/App/usb_device.c
+  * @author  MCD Application Team
+  * @brief   This file implements the USB Device
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+
 #include "usb_device.h"
+#include "usbd_core.h"
 #include "usbd_desc.h"
-#include "usbd_def.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
+#include "main.h"
+
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* USER CODE BEGIN PV */
+/* Private variables ---------------------------------------------------------*/
+__IO uint32_t remotewakeupon = 0;
+uint8_t HID_Buffer[4];
+extern PCD_HandleTypeDef hpcd_USB_FS;
+
+/* USER CODE END PV */
+
+/* USER CODE BEGIN PFP */
+/* Private function prototypes -----------------------------------------------*/
+
+/* USER CODE END PFP */
 
 
+/* USB Device Core handle declaration. */
 USBD_HandleTypeDef hUsbDeviceFS;
+extern USBD_DescriptorsTypeDef CDC_Desc;
 
-// extern USBD_HandleTypeDef hUsbDeviceFS;
-uint8_t UserTxBuffer[512] = "MY CDC is Working!\r\n";
-uint8_t UserRxBuffer[512];
+/*
+ * -- Insert your variables declaration here --
+ */
 
-// USBD_CDC_ItfTypeDef USBD_CDC_Template_fops;
-uint8_t CDC_EpAdd_Inst[3] = { CDC_IN_EP, CDC_OUT_EP, CDC_CMD_EP }; /* CDC Endpoint Addresses array */
-uint8_t HID_EpAdd_Inst    = HID_EPIN_ADDR;                         /* HID Endpoint Address array */
-// uint8_t hid_report_buffer[4];
-uint8_t HID_InstID = 0;
-uint8_t CDC_InstID = 0;
+/* USER CODE END 0 */
 
+/*
+ * -- Insert your external function declaration here --
+ */
+/* USER CODE BEGIN 1 */
 
-void MX_USB_DEVICE_Init(void)
+/* USER CODE END 1 */
+
+/**
+  * Init USB device Library, add supported class and start the library
+  * @retval None
+  */
+void MX_USB_Device_Init(void)
 {
-  /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
-
-  /* USER CODE END USB_DEVICE_Init_PreTreatment */
+  /* USER CODE BEGIN USB_Device_Init_PreTreatment */
+  /* USER CODE END USB_Device_Init_PreTreatment */
 
   /* Init Device Library, add supported class and start the library. */
-  if (USBD_Init(&hUsbDeviceFS, &Class_Desc, DEVICE_FS) != USBD_OK)
+  if (USBD_Init(&hUsbDeviceFS, &CDC_Desc, 0) != USBD_OK)
   {
     Error_Handler();
   }
@@ -32,18 +80,13 @@ void MX_USB_DEVICE_Init(void)
   {
     Error_Handler();
   }
-  if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_CDC_Template_fops) != USBD_OK)
+  if (USBD_CDC_RegisterInterface(&hUsbDeviceFS, &USBD_Interface_fops_FS) != USBD_OK)
   {
     Error_Handler();
   }
-  if (USBD_Start(&hUsbDeviceFS) != USBD_OK)
-  {
-    Error_Handler();
-  }
+  /* USER CODE BEGIN USB_Device_Init_PostTreatment */
 
-  /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
-
-  /* USER CODE END USB_DEVICE_Init_PostTreatment */
+  /* USER CODE END USB_Device_Init_PostTreatment */
 }
 
 /**
@@ -53,4 +96,3 @@ void MX_USB_DEVICE_Init(void)
 /**
   * @}
   */
-
