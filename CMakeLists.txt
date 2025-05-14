@@ -76,6 +76,25 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   # src/quadspi/Dev_Inf.c
   # src/quadspi/Loader_Src.c
   # src/quadspi/W25Q128.c
+
+
+  # STM32 USB Package
+  src/usb/usbd_conf.c
+  src/usb/usbd_desc.c
+  src/usb/usbd_cdc_if.c
+  src/usb/usb_device.c
+
+  src/stm32-mw-usb-device/Class/HID/Src/usbd_hid.c
+
+  src/stm32-mw-usb-device/Class/CDC/Src/usbd_cdc.c
+  
+  # src/stm32-mw-usb-device/Core/Src/usbd_conf_template.c 
+  src/stm32-mw-usb-device/Core/Src/usbd_core.c 
+  src/stm32-mw-usb-device/Core/Src/usbd_ctlreq.c 
+  # src/stm32-mw-usb-device/Core/Src/usbd_desc_template.c 
+  src/stm32-mw-usb-device/Core/Src/usbd_ioreq.c
+
+  src/stm32-mw-usb-device/Class/CompositeBuilder/Src/usbd_composite_builder.c
 )
 
 # Add include paths
@@ -84,7 +103,14 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
   Core/Inc
   src
   src/quadspi
-)
+
+  # STM32 USB Package
+  src/usb
+  src/stm32-mw-usb-device/Core/Inc  
+  src/stm32-mw-usb-device/Class/CompositeBuilder/Inc 
+  src/stm32-mw-usb-device/Class/HID/Inc
+  src/stm32-mw-usb-device/Class/CDC/Inc
+  )
 
 # Add project symbols (macros)
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE

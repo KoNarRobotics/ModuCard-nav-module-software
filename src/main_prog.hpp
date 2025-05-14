@@ -4,7 +4,20 @@
 #include "stmepic.hpp"
 #include "fdcan.hpp"
 
+
+// USB Device includes
+#include "usbd_core.h"
+#include "usbd_cdc.h"
+#include "usbd_cdc_if.h"
+#include "usbd_hid.h"
+#include "usbd_desc.h"
+#include "usbd_composite_builder.h"
+#include "usb_device.h"
+
+
 namespace se = stmepic;
+
+void config_usb_device();
 
 void main_prog();
 

@@ -11,3 +11,4 @@ extern DMA_HandleTypeDef handle_GPDMA1_Channel2;
 extern SPI_HandleTypeDef hspi3;
 extern TIM_HandleTypeDef htim6;
 extern UART_HandleTypeDef huart4;
+extern PCD_HandleTypeDef hpcd_USB_DRD_FS;

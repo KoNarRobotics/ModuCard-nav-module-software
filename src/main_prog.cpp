@@ -32,6 +32,10 @@ se::GpioPin gpio_gps_exinterupt(*GPS_EXINTERUPT_GPIO_Port, GPS_EXINTERUPT_Pin);
 se::GpioPin gpio_gps_mode_select(*GPS_MODE_SELECT_GPIO_Port, GPS_MODE_SELECT_Pin);
 se::GpioPin gpio_gps_nreset(*GPS_NRESET_GPIO_Port, GPS_NRESET_Pin);
 
+
+se::SimpleTask task_blink;
+
+
 /**
  * @brief  Period elapsed callback in non blocking mode
  * @note   This function is called  when TIM7 interrupt took place, inside
@@ -51,10 +55,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   }
 }
 }
-
-se::SimpleTask task_blink;
-
-#define IMU_ICM_20948 0x69
 
 
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
@@ -101,15 +101,17 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     auto d = bno055->get_calibration_data();
     if(d.calibrated) {
       gpio_user_led_2.toggle();
+      log_debug("IMU calibrated");
     } else {
       gpio_user_led_2.write(0);
+      log_debug("IMU not calibrated");
     }
-    //   auto data = a.valueOrDie();
-    //   log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
-    //             std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
-    //             std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
-    //             std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
-    //             "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
+    // auto data = a.valueOrDie();
+    // log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
+    //           std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
+    //           std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
+    //           std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
+    //           "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
     // } else {
     //   log_error("IMU error: " + a.status().to_string());
     // }
@@ -130,19 +132,18 @@ void main_prog() {
   HAL_NVIC_SetPriority(TIM6_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(TIM6_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
+  // MX_USB_PCD_Init();
+
+  // MX_USB_DEVICE_Init();
+
   std::string version =
   std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
+  // CDC_Transmit_FS
   se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, true, version);
 
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
   i2c1->hardware_reset();
-
-  std::shared_ptr<std::vector<int>> ia = nullptr;
-  ia                                   = std::make_shared<std::vector<int>>(10);
-  for(int i = 0; i < 10; i++) {
-    ia->at(i) = i;
-  }
 
 
   task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 2500);

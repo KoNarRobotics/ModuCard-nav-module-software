@@ -72,7 +72,8 @@
     "sstream": "cpp",
     "variant": "cpp",
     "source_location": "c",
-    "complex": "cpp"
+    "complex": "cpp",
+    "usb_device.h": "c"
   },
   "editor.formatOnSave": true,
   "python.autoComplete.extraPaths": [

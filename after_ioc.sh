@@ -50,7 +50,7 @@ if [ -f $main_file ]; then
   sed -i '/\.\.\/\.\.\/Core\/Src\/syscalls\.c/d' $cmake_file
 
 
-  sed -i 's|static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|__attribute__((section(".ramaxis_section"))) static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|' $heap_file
+  # sed -i 's|static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|__attribute__((section(".ramaxis_section"))) static uint8_t ucHeap\[ configTOTAL_HEAP_SIZE \];|' $heap_file
 
   rm -rf CMakePresets.json
 fi
