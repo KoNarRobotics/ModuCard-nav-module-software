@@ -87,6 +87,11 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
   fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
   fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
+  fdcan->add_callback(CAN_IMU_STATUS_FRAME_ID, can_callback_imu_status, bno055.get());
+  fdcan->add_callback(CAN_IMU_ORIENTATION_FRAME_ID, can_callback_imu_orientation, bno055.get());
+  fdcan->add_callback(CAN_IMU_LINEAR_ACCELERATION_FRAME_ID, can_callback_imu_lin_acceleration, bno055.get());
+  fdcan->add_callback(CAN_IMU_MAGNETIC_FIELD_FRAME_ID, can_callback_imu_magnetic_field, bno055.get());
+  fdcan->add_callback(CAN_IMU_GYRATION_FRAME_ID, can_callback_imu_gyration, bno055.get());
 
   while(1) {
     vTaskDelay(100);
