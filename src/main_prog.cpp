@@ -82,7 +82,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
   STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
   bmp280->device_task_set_settings(settings);
-  bmp280->device_start();
+  // bmp280->device_start();
   STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
 
   fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
@@ -91,23 +91,6 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   while(1) {
     vTaskDelay(100);
 
-    // auto state = i2c1->is_device_ready(0x28, 1, 100);
-    // uint8_t data[1] = { 0 };
-    // auto st1        = i2c1->write(IMU_ICM_20948, 0x7F, data, 1); // write to bank 0
-    // auto state2     = i2c1->read(IMU_ICM_20948, 0x00, data, 1);
-
-    // log_debug("IMU state: " + state2.to_string());
-    // auto se = bmp280->get_data();
-    // log_debug("BARO pres: " + std::to_string(se.valueOrDie().pressure));
-    // auto i2c_devices = i2c1->scan_for_devices();
-    // if(!i2c_devices.ok()) {
-    //   log_error("I2C scan error: " + i2c_devices.status().to_string());
-    // } else {
-    //   log_debug("I2C scan result: " + std::to_string(i2c_devices.valueOrDie().size()));
-    //   for(auto &device : i2c_devices.valueOrDie()) {
-    //     log_debug("I2C device: " + std::to_string(device));
-    //   }
-    // }
     auto a = bno055->get_data();
     if(a.ok()) {
       auto d    = bno055->get_calibration_data();
