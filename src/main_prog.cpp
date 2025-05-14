@@ -96,20 +96,24 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   while(1) {
     vTaskDelay(100);
 
-    auto a = bno055->get_data();
-    if(a.ok()) {
-      auto d    = bno055->get_calibration_data();
-      auto data = a.valueOrDie();
-      log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
-                std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
-                std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
-                std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
-                "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
+    // auto a = bno055->get_data();
+    // if(a.ok()) {
+    auto d = bno055->get_calibration_data();
+    if(d.calibrated) {
+      gpio_user_led_2.toggle();
     } else {
-      log_error("IMU error: " + a.status().to_string());
+      gpio_user_led_2.write(0);
     }
+    //   auto data = a.valueOrDie();
+    //   log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
+    //             std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
+    //             std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
+    //             std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
+    //             "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
+    // } else {
+    //   log_error("IMU error: " + a.status().to_string());
+    // }
 
-    gpio_user_led_1.toggle();
     gpio_status_led.toggle();
   }
 }

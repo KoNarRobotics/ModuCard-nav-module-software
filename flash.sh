@@ -1,2 +1,2 @@
 #!/bin/bash
-openocd -f openocd.conf
+openocd -f openocd-flash.conf
