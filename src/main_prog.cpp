@@ -8,6 +8,7 @@
 #include "logger.hpp"
 #include "can_messages.h"
 #include "ICM20948.hpp"
+#include "usbd_cdc_if.h"
 
 
 std::shared_ptr<se::I2C> i2c1;
@@ -98,14 +99,18 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
     // auto a = bno055->get_data();
     // if(a.ok()) {
-    auto d = bno055->get_calibration_data();
+    auto d    = bno055->get_calibration_data();
+    char *str = "IMU";
     if(d.calibrated) {
-      gpio_user_led_2.toggle();
-      log_debug("IMU calibrated");
-    } else {
-      gpio_user_led_2.write(0);
-      log_debug("IMU not calibrated");
+      TEMPLATE_Transmit((uint8_t *)str, sizeof(str));
     }
+    // if(d.calibrated) {
+    //   gpio_user_led_2.toggle();
+    //   log_debug("IMU calibrated");
+    // } else {
+    //   gpio_user_led_2.write(0);
+    //   log_debug("IMU not calibrated");
+    // }
     // auto data = a.valueOrDie();
     // log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
     //           std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
@@ -121,13 +126,6 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 }
 
 
-void can_callback(se::CanBase &can, se::CanDataFrame &msg, void *args) {
-  (void)can;
-  (void)args;
-  // log_debug(msg.to_string());
-}
-
-
 void main_prog() {
   HAL_NVIC_SetPriority(TIM6_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(TIM6_IRQn);
@@ -135,11 +133,13 @@ void main_prog() {
   // MX_USB_PCD_Init();
 
   // MX_USB_Device_Init();
+  MX_USB_PCD_Init();
+  MX_USB_Device_Init();
 
   std::string version =
   std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
   // CDC_Transmit_FS
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, nullptr, false, version);
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, false, version);
 
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
