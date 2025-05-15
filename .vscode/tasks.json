@@ -1,56 +1,26 @@
 {
   "version": "2.0.0",
   "tasks": [
-    // {
-    //   "label": "Setup-Remote-Workspace",
-    //   "type": "shell",
-    //   "command": "ssh",
-    //   "args": [
-    //     "${input:remoteUser}@${input:remoteIP}",
-    //     "\"bash -c 'mkdir -p ~/debug/${workspaceFolderBasename} && exit'\""
-    //   ],
-    //   "problemMatcher": []
-    // },
-    // {
-    //   "label": "Copy-Files-To-Remote",
-    //   "type": "shell",
-    //   "dependsOn": "Setup-Remote-Workspace",
-    //   "command": "bash",
-    //   "args": [
-    //     "-c",
-    //     " scp ${workspaceFolder}/build/firmware.elf ${input:remoteUser}@${input:remoteIP}:~/debug/${workspaceFolderBasename}"
-    //   ],
-    //   "problemMatcher": []
-    // },
-    // {
-    //   "label": "Generate-Random-Port",
-    //   "type": "shell",
-    //   "command": "shuf -i 50001-59999 -n 1 > .vscode/random-port.txt",
-    //   "problemMatcher": []
-    // },
-    // {
-    //   "label": "Read-Port",
-    //   "type": "shell",
-    //   "command": "echo  ${input:getPort}",
-    //   "problemMatcher": [],
-    //   "presentation": {
-    //     "echo": false,
-    //     "reveal": "always",
-    //     "focus": true,
-    //     "panel": "new"
-    //   }
-    // },
+    {
+      "label": "Copy-reset-config",
+      "type": "shell",
+      "command": "scp",
+      "args": [
+        "${workspaceFolder}/openocd-reset.conf",
+        "${input:remoteUser}@${input:remoteIP}:openocd-reset.conf"
+      ]
+    },
     {
       "label": "Start-Remote-OpenOCD",
       "type": "shell",
       "dependsOn": "Generate-Random-Port",
       "command": "ssh",
       "args": [
-        "-t", // Force pseudo-terminal allocation
+        "-t",
         "${input:remoteUser}@${input:remoteIP}",
         "'openocd  -c \"bindto 0.0.0.0\" -c \"gdb_port ${input:getPort}\" -f interface/stlink-dap.cfg -f target/stm32h5x.cfg -c \"hla_serial ${input:stlinkID}\" -c \"init; arm semihosting enable\"'"
       ],
-      "isBackground": true, // run task in backgound
+      "isBackground": true,
       "problemMatcher": {
         "owner": "custom",
         "pattern": [
@@ -63,10 +33,21 @@
         ],
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Info : Listening on port", // Adjust this to match OpenOCD's output
-          "endsPattern": "for gdb connections" // Adjust this to match OpenOCD's output
+          "beginsPattern": "Info : Listening on port",
+          "endsPattern": "for gdb connections"
         }
       }
+    },
+    {
+      "label": "Restart MCU",
+      "type": "shell",
+      "dependsOn": "Copy-reset-config",
+      "command": "ssh",
+      "args": [
+        "${input:remoteUser}@${input:remoteIP}",
+        "'openocd -f ~/openocd-reset.conf'"
+      ],
+      "problemMatcher": []
     }
   ],
   "inputs": [

@@ -101,9 +101,9 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     // if(a.ok()) {
     auto d    = bno055->get_calibration_data();
     char *str = "IMU";
-    if(d.calibrated) {
-      TEMPLATE_Transmit((uint8_t *)str, sizeof(str));
-    }
+    // if(d.calibrated) {
+    // TEMPLATE_Transmit((uint8_t *)str, sizeof(str));
+    // }
     // if(d.calibrated) {
     //   gpio_user_led_2.toggle();
     //   log_debug("IMU calibrated");
