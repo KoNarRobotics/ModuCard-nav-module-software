@@ -94,6 +94,8 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   fdcan->add_callback(CAN_IMU_MAGNETIC_FIELD_FRAME_ID, can_callback_imu_magnetic_field, bno055.get());
   fdcan->add_callback(CAN_IMU_GYRATION_FRAME_ID, can_callback_imu_gyration, bno055.get());
 
+  bno055->device_reset();
+
   while(1) {
     vTaskDelay(100);
 
