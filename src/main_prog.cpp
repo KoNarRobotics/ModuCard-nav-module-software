@@ -9,13 +9,18 @@
 #include "can_messages.h"
 #include "ICM20948.hpp"
 #include "usbd_cdc_if.h"
+#include "uart.hpp"
+#include "atmodem.hpp"
 
 
 std::shared_ptr<se::I2C> i2c1;
 std::shared_ptr<se::sensors::imu::BNO055> bno055       = nullptr;
 std::shared_ptr<se::sensors::barometer::BMP280> bmp280 = nullptr;
 std::shared_ptr<se::sensors::imu::ICM20948> icm20948   = nullptr;
-std::shared_ptr<se::FDCAN> fdcan                       = nullptr;
+std::shared_ptr<se::modems::AtModem> atmodem           = nullptr;
+
+std::shared_ptr<se::UART> uart4  = nullptr;
+std::shared_ptr<se::FDCAN> fdcan = nullptr;
 
 se::GpioPin gpio_i2c1_scl(*GPIOB, GPIO_PIN_8);
 se::GpioPin gpio_i2c1_sda(*GPIOB, GPIO_PIN_9);
@@ -63,6 +68,14 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   gpio_user_led_1.write(0);
   gpio_user_led_2.write(0);
   se::Status stat = se::Status::OK();
+
+  se::modems::AtModemSettings atmodem_settings;
+  atmodem_settings.enable_gps = true; // Enable GPS by default
+
+
+  STMEPIC_ASSING_TO_OR_HRESET(atmodem, se::modems::AtModem::Make(uart4));
+  atmodem->device_set_settings(atmodem_settings);
+  STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
 
   se::DeviceThreadedSettings settings;
   settings.uxStackDepth = 1024;
@@ -143,6 +156,8 @@ void main_prog() {
   // CDC_Transmit_FS
   se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, false, version);
 
+
+  STMEPIC_ASSING_TO_OR_HRESET(uart4, se::UART::Make(huart4, se::HardwareType::DMA));
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
   i2c1->hardware_reset();
