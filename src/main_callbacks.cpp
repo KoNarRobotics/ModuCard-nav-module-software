@@ -8,6 +8,8 @@
 #include "logger.hpp"
 #include "can_messages.h"
 #include "BNO055.hpp"
+#include "atmodem.hpp"
+#include "nmea.hpp"
 
 namespace se = stmepic;
 
@@ -162,5 +164,122 @@ void can_callback_imu_gyration(se::CanBase &can, se::CanDataFrame &msg, void *ar
   frame.data_size      = CAN_IMU_GYRATION_LENGTH;
   frame.remote_request = false;
   can_imu_gyration_pack(frame.data, &ms, frame.data_size);
+  (void)can.write(frame);
+}
+
+void can_callback_gps_status(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem = static_cast<se::modems::AtModem *>(args);
+  can_gps_status_t status;
+  if(modem->device_ok()) {
+    status.status = CAN_GPS_STATUS_STATUS_OK_CHOICE;
+  } else {
+    status.status = CAN_GPS_STATUS_STATUS_ERROR_CHOICE;
+  }
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_STATUS_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_STATUS_FRAME_ID;
+  frame.data_size      = CAN_GPS_STATUS_LENGTH;
+  frame.remote_request = false;
+  can_gps_status_pack(frame.data, &status, frame.data_size);
+  (void)can.write(frame);
+}
+
+void can_callback_gps_latitude(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem     = static_cast<se::modems::AtModem *>(args);
+  auto nmea_data = modem->get_nmea_data();
+  auto latitude  = nmea_data.valueOrDie().get_gga_data().latitude;
+  can_gps_latitude_t lat;
+  lat.latitude = latitude;
+
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_LATITUDE_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_LATITUDE_FRAME_ID;
+  frame.data_size      = CAN_GPS_LATITUDE_LENGTH;
+  frame.remote_request = false;
+  can_gps_latitude_pack(frame.data, &lat, frame.data_size);
+  (void)can.write(frame);
+}
+
+void can_callback_gps_longitude(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem     = static_cast<se::modems::AtModem *>(args);
+  auto nmea_data = modem->get_nmea_data();
+  auto longitude = nmea_data.valueOrDie().get_gga_data().longitude;
+  can_gps_longitude_t lon;
+  lon.longitude = longitude;
+
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_LONGITUDE_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_LONGITUDE_FRAME_ID;
+  frame.data_size      = CAN_GPS_LONGITUDE_LENGTH;
+  frame.remote_request = false;
+  can_gps_longitude_pack(frame.data, &lon, frame.data_size);
+  (void)can.write(frame);
+}
+
+void can_callback_gps_altitude(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem     = static_cast<se::modems::AtModem *>(args);
+  auto nmea_data = modem->get_nmea_data();
+  if(!nmea_data.ok()) {
+    // log_error(se::Logger::parse_to_json_format("GPS", nmea_data.status().to_string(), false));
+    return;
+  }
+  auto altitude = nmea_data.valueOrDie().get_gga_data().altitude;
+  can_gps_altitude_t alt;
+  alt.altitude = altitude;
+
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_ALTITUDE_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_ALTITUDE_FRAME_ID;
+  frame.data_size      = CAN_GPS_ALTITUDE_LENGTH;
+  frame.remote_request = false;
+  can_gps_altitude_pack(frame.data, &alt, frame.data_size);
+  (void)can.write(frame);
+}
+
+void can_callback_gps_date(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem     = static_cast<se::modems::AtModem *>(args);
+  auto nmea_data = modem->get_nmea_data();
+
+  auto time = nmea_data.valueOrDie().get_gga_data().time;
+  auto date = nmea_data.valueOrDie().get_rmc_data().date;
+  can_gps_date_t d;
+  d.hour   = time.hours;
+  d.minute = time.minutes;
+  d.second = time.seconds;
+  d.year   = date.month;
+  d.month  = date.year;
+  d.day    = date.day;
+
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_DATE_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_DATE_FRAME_ID;
+  frame.data_size      = CAN_GPS_DATE_LENGTH;
+  frame.remote_request = false;
+  can_gps_date_pack(frame.data, &d, frame.data_size);
+  (void)can.write(frame);
+}
+
+
+void can_callback_gps_covariance(se::CanBase &can, se::CanDataFrame &msg, void *args) {
+  (void)args;
+  auto modem      = static_cast<se::modems::AtModem *>(args);
+  auto nmea_data  = modem->get_nmea_data();
+  auto covariance = nmea_data.valueOrDie().get_gbs_data();
+  can_gps_covariance_t cov;
+  cov.alt = covariance.err_altitude;
+  cov.lat = covariance.err_latitude;
+  cov.lon = covariance.err_longitude;
+
+  se::CanDataFrame frame;
+  frame.extended_id    = CAN_GPS_COVARIANCE_IS_EXTENDED;
+  frame.frame_id       = CAN_GPS_COVARIANCE_FRAME_ID;
+  frame.data_size      = CAN_GPS_COVARIANCE_LENGTH;
+  frame.remote_request = false;
+  can_gps_covariance_pack(frame.data, &cov, frame.data_size);
   (void)can.write(frame);
 }

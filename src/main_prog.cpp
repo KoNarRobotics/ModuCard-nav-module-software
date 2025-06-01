@@ -54,6 +54,7 @@ extern "C" {
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if(htim->Instance == TIM6) {
     se::Ticker::get_instance().irq_update_ticker();
+    HAL_IncTick();
   }
 
   if(htim->Instance == TIM7) {
@@ -62,6 +63,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 }
 
+
+char rx_buff[512];
+
+// extern "C" {
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *hi2c) {
+//   HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
+//   memset(rx_buff, 0, sizeof(rx_buff));
+// }
+
+// void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *hi2c) {
+//   // UART::run_rx_callbacks_from_isr(hi2c, true);
+//   __NOP();
+// }
+// }
 
 void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // gpio_imu_nreset.write(1);
@@ -72,16 +87,23 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   se::modems::AtModemSettings atmodem_settings;
   atmodem_settings.enable_gps = true; // Enable GPS by default
 
-
-  STMEPIC_ASSING_TO_OR_HRESET(atmodem, se::modems::AtModem::Make(uart4));
-  atmodem->device_set_settings(atmodem_settings);
-  STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
-
   se::DeviceThreadedSettings settings;
   settings.uxStackDepth = 1024;
   settings.uxPriority   = 2;
   settings.period       = 10;
   se::sensors::imu::BNO0055_Settings bno055_settings;
+
+
+  se::DeviceThreadedSettings settings_at;
+  settings.uxStackDepth = 4024;
+  settings.uxPriority   = 2;
+  settings.period       = 10;
+  STMEPIC_ASSING_TO_OR_HRESET(atmodem, se::modems::AtModem::Make(uart4));
+  atmodem->device_set_settings(atmodem_settings);
+  atmodem->device_task_set_settings(settings);
+  // atmodem->device_reset();
+  STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
+
 
   STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1));
   bno055->device_set_settings(bno055_settings);
@@ -107,18 +129,43 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   fdcan->add_callback(CAN_IMU_MAGNETIC_FIELD_FRAME_ID, can_callback_imu_magnetic_field, bno055.get());
   fdcan->add_callback(CAN_IMU_GYRATION_FRAME_ID, can_callback_imu_gyration, bno055.get());
 
+  fdcan->add_callback(CAN_GPS_STATUS_FRAME_ID, can_callback_gps_status, atmodem.get());
+  fdcan->add_callback(CAN_GPS_LATITUDE_FRAME_ID, can_callback_gps_latitude, atmodem.get());
+  fdcan->add_callback(CAN_GPS_LONGITUDE_FRAME_ID, can_callback_gps_longitude, atmodem.get());
+  fdcan->add_callback(CAN_GPS_ALTITUDE_FRAME_ID, can_callback_gps_altitude, atmodem.get());
+  fdcan->add_callback(CAN_GPS_DATE_FRAME_ID, can_callback_gps_date, atmodem.get());
+  fdcan->add_callback(CAN_GPS_COVARIANCE_FRAME_ID, can_callback_gps_covariance, atmodem.get());
+
   bno055->device_reset();
 
+  // HAL_StatusTypeDef s;
+  // s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
   while(1) {
     vTaskDelay(100);
 
     // auto a = bno055->get_data();
     // if(a.ok()) {
-    auto d    = bno055->get_calibration_data();
-    char *str = "IMU";
-    // if(d.calibrated) {
-    // TEMPLATE_Transmit((uint8_t *)str, sizeof(str));
+    // auto d = bno055->get_calibration_data();
+    // char *str = "AT\r\n";
+    // // s         = HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
+    // auto a       = uart4->write((uint8_t *)str, sizeof(str), 100);
+    // char data[8] = { 0 };
+    // uart4->read((uint8_t *)data, sizeof(data), 2000);
+
+
+    // auto a = atmodem->get_nmea_data();
+    // if(a.ok()) {
+    //   log_info("NMEA data received successfully");
+    //   // auto &nmea_data = a.valueOrDie();
+    //   // auto gga        = nmea_data.get_gga_data();
+    //   // log_info("NMEA data: " + std::to_string(gga.longitude) + " " + std::to_string(gga.latitude) + " " +
+    //   //          std::to_string(gga.altitude) + " " + std::to_string(gga.fix_quality) + " " +
+    //   //          std::to_string(gga.num_satellites));
+    // } else {
+    //   log_error("NMEA data error: " + a.status().to_string());
     // }
+
+    // auto d = bno055->get_calibration_data();
     // if(d.calibrated) {
     //   gpio_user_led_2.toggle();
     //   log_debug("IMU calibrated");
@@ -132,9 +179,6 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
     //           std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
     //           std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
     //           "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
-    // } else {
-    //   log_error("IMU error: " + a.status().to_string());
-    // }
 
     gpio_status_led.toggle();
   }
@@ -153,11 +197,32 @@ void main_prog() {
 
   std::string version =
   std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
-  // CDC_Transmit_FS
+  // CDC_Transmit_FS TEMPLATE_Transmit
   se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, false, version);
 
 
-  STMEPIC_ASSING_TO_OR_HRESET(uart4, se::UART::Make(huart4, se::HardwareType::DMA));
+  STMEPIC_ASSING_TO_OR_HRESET(uart4, se::UART::Make(huart4, se::HardwareType::IT));
+  uart4->hardware_start();
+  // HAL_StatusTypeDef s;
+  // s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
+  // while(1) {
+  //   char *str = "AT\r\n";
+  //   s         = HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
+  //   // s         = HAL_UART_Transmit(&huart4, (uint8_t *)str, sizeof(str), 300);
+  //   // __HAL_UART_FLUSH_DRREGISTER(&huart4);
+  //   // __HAL_UART_CLEAR_OREFLAG(&huart4);
+  //   // s = HAL_UART_Receive(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff), 300);
+  //   // log_info("UART4 data: " + std::string(rx_buff) + " status: " + std::to_string(s));
+  //   // memset(rx_buff, 0, sizeof(rx_buff));
+  //   // // HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
+  //   // // HAL_StatusTypeDef s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
+  //   // // s                   = HAL_UART_Receive(&huart4, (uint8_t *)data, sizeof(data), 300);
+  //   HAL_Delay(300);
+  // }
+
+
+  // log_debug("UART4 data: " + std::string(data));
+
 
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
   i2c1->hardware_reset();
