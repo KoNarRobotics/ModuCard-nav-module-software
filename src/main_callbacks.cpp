@@ -223,10 +223,7 @@ void can_callback_gps_altitude(se::CanBase &can, se::CanDataFrame &msg, void *ar
   (void)args;
   auto modem     = static_cast<se::modems::AtModem *>(args);
   auto nmea_data = modem->get_nmea_data();
-  if(!nmea_data.ok()) {
-    // log_error(se::Logger::parse_to_json_format("GPS", nmea_data.status().to_string(), false));
-    return;
-  }
+
   auto altitude = nmea_data.valueOrDie().get_gga_data().altitude;
   can_gps_altitude_t alt;
   alt.altitude = altitude;
