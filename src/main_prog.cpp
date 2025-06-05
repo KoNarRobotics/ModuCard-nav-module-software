@@ -78,7 +78,7 @@ char rx_buff[512];
 // }
 // }
 
-void task_blink_func(se::SimpleTask &task, void *pvParameters) {
+Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // gpio_imu_nreset.write(1);
   gpio_user_led_1.write(0);
   gpio_user_led_2.write(0);
@@ -101,14 +101,15 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   STMEPIC_ASSING_TO_OR_HRESET(atmodem, se::modems::AtModem::Make(uart4));
   atmodem->device_set_settings(atmodem_settings);
   atmodem->device_task_set_settings(settings);
-  // atmodem->device_reset();
-  STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
+  // STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
+  // STMEPIC_NONE_OR_HARD_FAULT(atmodem->device_task_wait_for_device_to_start();
 
 
   STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1));
   bno055->device_set_settings(bno055_settings);
   bno055->device_task_set_settings(settings);
   STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
+  STMEPIC_NONE_OR_HARD_FAULT(bno055->device_task_wait_for_device_to_start());
 
 
   // STMEPIC_ASSING_TO_OR_HRESET(icm20948, se::sensors::imu::ICM20948::Make(i2c1,
@@ -120,6 +121,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
   bmp280->device_task_set_settings(settings);
   // bmp280->device_start();
   STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
+  STMEPIC_NONE_OR_HARD_FAULT(bmp280->device_task_wait_for_device_to_start());
 
   fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
   fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
@@ -182,6 +184,7 @@ void task_blink_func(se::SimpleTask &task, void *pvParameters) {
 
     gpio_status_led.toggle();
   }
+  return Status::OK();
 }
 
 

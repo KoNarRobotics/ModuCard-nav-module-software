@@ -191,7 +191,8 @@ void can_callback_gps_latitude(se::CanBase &can, se::CanDataFrame &msg, void *ar
   auto nmea_data = modem->get_nmea_data();
   auto latitude  = nmea_data.valueOrDie().get_gga_data().latitude;
   can_gps_latitude_t lat;
-  lat.latitude = latitude;
+  // lat.latitude = latitude;
+  lat.latitude = 51.062442876770696; // Example latitude, replace with actual value
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_GPS_LATITUDE_IS_EXTENDED;
@@ -208,7 +209,8 @@ void can_callback_gps_longitude(se::CanBase &can, se::CanDataFrame &msg, void *a
   auto nmea_data = modem->get_nmea_data();
   auto longitude = nmea_data.valueOrDie().get_gga_data().longitude;
   can_gps_longitude_t lon;
-  lon.longitude = longitude;
+  // lon.longitude = longitude;
+  lon.longitude = 16.980411413875135;
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_GPS_LONGITUDE_IS_EXTENDED;
