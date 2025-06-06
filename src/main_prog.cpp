@@ -63,25 +63,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 }
 }
 
-
-char rx_buff[512];
-
-// extern "C" {
-// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *hi2c) {
-//   HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
-//   memset(rx_buff, 0, sizeof(rx_buff));
-// }
-
-// void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *hi2c) {
-//   // UART::run_rx_callbacks_from_isr(hi2c, true);
-//   __NOP();
-// }
-// }
-
-Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
-  // gpio_imu_nreset.write(1);
+Status init_board(se::SimpleTask &task, void *pvParameters) {
   gpio_user_led_1.write(0);
   gpio_user_led_2.write(0);
+  gpio_status_led.write(0);
   gpio_gps_mode_select.write(1);
   gpio_gps_nreset.write(1);
 
@@ -94,25 +79,28 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
   settings.uxStackDepth = 1024;
   settings.uxPriority   = 2;
   settings.period       = 10;
+
+
   se::sensors::imu::BNO0055_Settings bno055_settings;
+  bno055_settings.calibration_data = {};
 
 
   se::DeviceThreadedSettings settings_at;
   settings.uxStackDepth = 4024;
   settings.uxPriority   = 2;
   settings.period       = 10;
-  STMEPIC_ASSING_TO_OR_HRESET(atmodem, se::modems::AtModem::Make(uart4));
-  atmodem->device_set_settings(atmodem_settings);
-  atmodem->device_task_set_settings(settings);
-  // STMEPIC_NONE_OR_HRESET(atmodem->device_task_start());
-  // STMEPIC_NONE_OR_HARD_FAULT(atmodem->device_task_wait_for_device_to_start();
+  STMEPIC_ASSING_TO_OR_RETURN(atmodem, se::modems::AtModem::Make(uart4));
+  STMEPIC_RETURN_ON_ERROR(atmodem->device_set_settings(atmodem_settings));
+  STMEPIC_RETURN_ON_ERROR(atmodem->device_task_set_settings(settings));
+  // STMEPIC_RETURN_ON_ERROR(atmodem->device_task_start());
+  // STMEPIC_RETURN_ON_ERROR(atmodem->device_task_wait_for_device_to_start();
 
 
-  STMEPIC_ASSING_TO_OR_HRESET(bno055, se::sensors::imu::BNO055::Make(i2c1));
-  bno055->device_set_settings(bno055_settings);
-  bno055->device_task_set_settings(settings);
-  STMEPIC_NONE_OR_HRESET(bno055->device_task_start());
-  STMEPIC_NONE_OR_HARD_FAULT(bno055->device_task_wait_for_device_to_start());
+  STMEPIC_ASSING_TO_OR_RETURN(bno055, se::sensors::imu::BNO055::Make(i2c1));
+  STMEPIC_RETURN_ON_ERROR(bno055->device_set_settings(bno055_settings));
+  STMEPIC_RETURN_ON_ERROR(bno055->device_task_set_settings(settings));
+  STMEPIC_RETURN_ON_ERROR(bno055->device_task_start());
+  STMEPIC_RETURN_ON_ERROR(bno055->device_task_wait_for_device_to_start());
 
 
   // STMEPIC_ASSING_TO_OR_HRESET(icm20948, se::sensors::imu::ICM20948::Make(i2c1,
@@ -120,130 +108,68 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // STMEPIC_NONE_OR_HRESET(icm20948->device_task_start());
 
 
-  STMEPIC_ASSING_TO_OR_HRESET(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
+  STMEPIC_ASSING_TO_OR_RETURN(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
   bmp280->device_task_set_settings(settings);
   // bmp280->device_start();
-  STMEPIC_NONE_OR_HRESET(bmp280->device_task_start());
-  STMEPIC_NONE_OR_HARD_FAULT(bmp280->device_task_wait_for_device_to_start());
-
-  fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get());
-  fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get());
-  fdcan->add_callback(CAN_IMU_STATUS_FRAME_ID, can_callback_imu_status, bno055.get());
-  fdcan->add_callback(CAN_IMU_ORIENTATION_FRAME_ID, can_callback_imu_orientation, bno055.get());
-  fdcan->add_callback(CAN_IMU_LINEAR_ACCELERATION_FRAME_ID, can_callback_imu_lin_acceleration, bno055.get());
-  fdcan->add_callback(CAN_IMU_MAGNETIC_FIELD_FRAME_ID, can_callback_imu_magnetic_field, bno055.get());
-  fdcan->add_callback(CAN_IMU_GYRATION_FRAME_ID, can_callback_imu_gyration, bno055.get());
-
-  fdcan->add_callback(CAN_GPS_STATUS_FRAME_ID, can_callback_gps_status, atmodem.get());
-  fdcan->add_callback(CAN_GPS_LATITUDE_FRAME_ID, can_callback_gps_latitude, atmodem.get());
-  fdcan->add_callback(CAN_GPS_LONGITUDE_FRAME_ID, can_callback_gps_longitude, atmodem.get());
-  fdcan->add_callback(CAN_GPS_ALTITUDE_FRAME_ID, can_callback_gps_altitude, atmodem.get());
-  fdcan->add_callback(CAN_GPS_DATE_FRAME_ID, can_callback_gps_date, atmodem.get());
-  fdcan->add_callback(CAN_GPS_COVARIANCE_FRAME_ID, can_callback_gps_covariance, atmodem.get());
-
-  bno055->device_reset();
-
-  // HAL_StatusTypeDef s;
-  // s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
-  while(1) {
-    vTaskDelay(100);
-
-    // char ok[] = "AT\r\n";
-    // auto st   = uart4->write((uint8_t *)ok, sizeof(ok), 100);
-    // char rx_buff[512] = { 0 };
-    // auto st           = uart4->read((uint8_t *)rx_buff, sizeof(rx_buff), 2000);
-    // log_info("UART4 data: " + std::string(rx_buff) + " status: " + st.to_string());
+  STMEPIC_RETURN_ON_ERROR(bmp280->device_task_start());
+  STMEPIC_RETURN_ON_ERROR(bmp280->device_task_wait_for_device_to_start());
 
 
-    // auto a = bno055->get_data();
-    // if(a.ok()) {
-    // auto d = bno055->get_calibration_data();
-    // char *str = "AT\r\n";
-    // // s         = HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
-    // auto a       = uart4->write((uint8_t *)str, sizeof(str), 100);
-    // char data[8] = { 0 };
-    // uart4->read((uint8_t *)data, sizeof(data), 2000);
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_BAROMETER_DATA_FRAME_ID, can_callback_bmp280_get_data, bmp280.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_IMU_STATUS_FRAME_ID, can_callback_imu_status, bno055.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_IMU_ORIENTATION_FRAME_ID, can_callback_imu_orientation, bno055.get()));
+  STMEPIC_RETURN_ON_ERROR(
+  fdcan->add_callback(CAN_IMU_LINEAR_ACCELERATION_FRAME_ID, can_callback_imu_lin_acceleration, bno055.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_IMU_MAGNETIC_FIELD_FRAME_ID, can_callback_imu_magnetic_field, bno055.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_IMU_GYRATION_FRAME_ID, can_callback_imu_gyration, bno055.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_STATUS_FRAME_ID, can_callback_gps_status, atmodem.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_LATITUDE_FRAME_ID, can_callback_gps_latitude, atmodem.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_LONGITUDE_FRAME_ID, can_callback_gps_longitude, atmodem.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_ALTITUDE_FRAME_ID, can_callback_gps_altitude, atmodem.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_DATE_FRAME_ID, can_callback_gps_date, atmodem.get()));
+  STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_GPS_COVARIANCE_FRAME_ID, can_callback_gps_covariance, atmodem.get()));
 
+  STMEPIC_RETURN_ON_ERROR(bno055->device_reset());
+  return se::Status::OK();
+}
 
-    // auto a = atmodem->get_nmea_data();
-    // if(a.ok()) {
-    //   log_info("NMEA data received successfully");
-    //   // auto &nmea_data = a.valueOrDie();
-    //   // auto gga        = nmea_data.get_gga_data();
-    //   // log_info("NMEA data: " + std::to_string(gga.longitude) + " " + std::to_string(gga.latitude) + " " +
-    //   //          std::to_string(gga.altitude) + " " + std::to_string(gga.fix_quality) + " " +
-    //   //          std::to_string(gga.num_satellites));
-    // } else {
-    //   log_error("NMEA data error: " + a.status().to_string());
-    // }
+Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
+  (void)pvParameters;
 
-    // auto d = bno055->get_calibration_data();
-    // if(d.calibrated) {
-    //   gpio_user_led_2.toggle();
-    //   log_debug("IMU calibrated");
-    // } else {
-    //   gpio_user_led_2.write(0);
-    //   log_debug("IMU not calibrated");
-    // }
-    // auto data = a.valueOrDie();
-    // log_debug("IMU acc: " + std::to_string(data.acc.x) + " " + std::to_string(data.acc.y) + " " +
-    //           std::to_string(data.acc.z) + "IMU gyr: " + std::to_string(data.gyr.x) + " " +
-    //           std::to_string(data.gyr.y) + " " + std::to_string(data.gyr.z) + "IMU mag: " +
-    //           std::to_string(data.mag.x) + " " + std::to_string(data.mag.y) + " " + std::to_string(data.mag.z) +
-    //           "IMU temp: " + std::to_string(data.temp) + "  Cal:" + std::to_string(d.calibrated));
-
+  if(!task.task_get_status().ok()) {
     gpio_status_led.toggle();
+    return task.task_get_status();
   }
+
+  gpio_user_led_1.toggle();
   return Status::OK();
 }
 
 
 void main_prog() {
+  // START ALL INTERRUPTS
   HAL_NVIC_SetPriority(TIM6_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(TIM6_IRQn);
   HAL_TIM_Base_Start_IT(&htim6);
-  // MX_USB_PCD_Init();
 
-  // MX_USB_Device_Init();
+  // INIT USB COm port
   MX_USB_PCD_Init();
   MX_USB_Device_Init();
 
-  std::string version =
-  std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
-  // CDC_Transmit_FS TEMPLATE_Transmit
+  // INIT LOGGER
+  std::string version = std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
   se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, false, version);
 
-
+  // INIT UART HANDLERS
   STMEPIC_ASSING_TO_OR_HRESET(uart4, se::UART::Make(huart4, se::HardwareType::IT));
   uart4->hardware_start();
-  // HAL_StatusTypeDef s;
-  // s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
-  // while(1) {
-  //   char *str = "AT\r\n";
-  //   s         = HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
-  //   // s         = HAL_UART_Transmit(&huart4, (uint8_t *)str, sizeof(str), 300);
-  //   // __HAL_UART_FLUSH_DRREGISTER(&huart4);
-  //   // __HAL_UART_CLEAR_OREFLAG(&huart4);
-  //   // s = HAL_UART_Receive(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff), 300);
-  //   // log_info("UART4 data: " + std::string(rx_buff) + " status: " + std::to_string(s));
-  //   // memset(rx_buff, 0, sizeof(rx_buff));
-  //   // // HAL_UART_Transmit_IT(&huart4, (uint8_t *)str, sizeof(str));
-  //   // // HAL_StatusTypeDef s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
-  //   // // s                   = HAL_UART_Receive(&huart4, (uint8_t *)data, sizeof(data), 300);
-  //   HAL_Delay(300);
-  // }
 
-
-  // log_debug("UART4 data: " + std::string(data));
-
-
+  // INIT I2C HANDLERS
   STMEPIC_ASSING_TO_OR_HRESET(i2c1, se::I2C::Make(hi2c1, gpio_i2c1_sda, gpio_i2c1_scl, se::HardwareType::DMA));
   i2c1->hardware_reset();
 
-
-  task_blink.task_init(task_blink_func, nullptr, 100, nullptr, 2500);
-  task_blink.task_run();
-
+  // INIT FDCAN HANDLER
   FDCAN_FilterTypeDef sFilterConfig = {};
   sFilterConfig.IdType              = FDCAN_EXTENDED_ID;
   sFilterConfig.FilterIndex         = 0;
@@ -261,8 +187,10 @@ void main_prog() {
   filter_config.globalFilter_NonMatchingExt  = FDCAN_REJECT;
   filter_config.globalFilter_RejectRemoteStd = FDCAN_FILTER_REMOTE;
   filter_config.globalFilter_RejectRemoteExt = FDCAN_FILTER_REMOTE;
-
-
   STMEPIC_ASSING_TO_OR_HRESET(fdcan, se::FDCAN::Make(hfdcan1, filter_config, nullptr, nullptr));
   fdcan->hardware_start();
+
+  // START MAIN TASK
+  task_blink.task_init(task_blink_func, nullptr, 100, init_board, 3500, 2, "MainTask", false);
+  task_blink.task_run();
 }
