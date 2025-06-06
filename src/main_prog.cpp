@@ -82,6 +82,9 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // gpio_imu_nreset.write(1);
   gpio_user_led_1.write(0);
   gpio_user_led_2.write(0);
+  gpio_gps_mode_select.write(1);
+  gpio_gps_nreset.write(1);
+
   se::Status stat = se::Status::OK();
 
   se::modems::AtModemSettings atmodem_settings;
@@ -144,6 +147,13 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
   // s = HAL_UART_Receive_IT(&huart4, (uint8_t *)rx_buff, sizeof(rx_buff));
   while(1) {
     vTaskDelay(100);
+
+    // char ok[] = "AT\r\n";
+    // auto st   = uart4->write((uint8_t *)ok, sizeof(ok), 100);
+    // char rx_buff[512] = { 0 };
+    // auto st           = uart4->read((uint8_t *)rx_buff, sizeof(rx_buff), 2000);
+    // log_info("UART4 data: " + std::string(rx_buff) + " status: " + st.to_string());
+
 
     // auto a = bno055->get_data();
     // if(a.ok()) {
