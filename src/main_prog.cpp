@@ -70,6 +70,8 @@ Status init_board(se::SimpleTask &task, void *pvParameters) {
   gpio_gps_mode_select.write(1);
   gpio_gps_nreset.write(1);
 
+  vTaskDelay(2000); // Wait for 1 second to ensure all GPIOs and devices booted correctly after power on
+
   se::Status stat = se::Status::OK();
 
   se::modems::AtModemSettings atmodem_settings;
