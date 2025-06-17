@@ -28,9 +28,9 @@
 #define USBD_VID                      0x0483
 #define USBD_PID                      22336  /* Replace '0xaaaa' with your device product ID */
 #define USBD_LANGID_STRING            1033   /* Replace '0xbbb' with your device language ID */
-#define USBD_MANUFACTURER_STRING      "STMicroelectronics" /* Add your manufacturer string */
-#define USBD_PRODUCT_HS_STRING        "STM32 Virtual ComPort" /* Add your product High Speed string */
-#define USBD_PRODUCT_FS_STRING        "STM32 Virtual ComPort" /* Add your product Full Speed string */
+#define USBD_MANUFACTURER_STRING      "KoNaR PWR" /* Add your manufacturer string */
+#define USBD_PRODUCT_HS_STRING        "ModuCard-nav-module ComPort" /* Add your product High Speed string */
+#define USBD_PRODUCT_FS_STRING        "ModuCard-nav-module ComPort" /* Add your product Full Speed string */
 #define USBD_CONFIGURATION_HS_STRING  "CDC Config" /* Add your configuration High Speed string */
 #define USBD_INTERFACE_HS_STRING      "CDC Interface" /* Add your Interface High Speed string */
 #define USBD_CONFIGURATION_FS_STRING  "CDC Config" /* Add your configuration Full Speed string */
