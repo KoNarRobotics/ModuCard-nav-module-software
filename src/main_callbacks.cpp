@@ -171,11 +171,14 @@ void can_callback_gps_status(se::CanBase &can, se::CanDataFrame &msg, void *args
   (void)args;
   auto modem = static_cast<se::modems::AtModem *>(args);
   can_gps_status_t status;
-  if(modem->device_ok()) {
-    status.status = CAN_GPS_STATUS_STATUS_OK_CHOICE;
-  } else {
-    status.status = CAN_GPS_STATUS_STATUS_ERROR_CHOICE;
-  }
+  // if(modem->device_ok()) {
+  //   status.status = CAN_GPS_STATUS_STATUS_OK_CHOICE;
+  // } else {
+  //   status.status = CAN_GPS_STATUS_STATUS_ERROR_CHOICE;
+  // }
+
+  status.status = CAN_GPS_STATUS_STATUS_DISCONNECTED_CHOICE;
+  status.signal = CAN_GPS_STATUS_SIGNAL_UNABLE_TO_FIX_POSITION_CHOICE;
   se::CanDataFrame frame;
   frame.extended_id    = CAN_GPS_STATUS_IS_EXTENDED;
   frame.frame_id       = CAN_GPS_STATUS_FRAME_ID;
@@ -191,8 +194,7 @@ void can_callback_gps_latitude(se::CanBase &can, se::CanDataFrame &msg, void *ar
   auto nmea_data = modem->get_nmea_data();
   auto latitude  = nmea_data.valueOrDie().get_gga_data().latitude;
   can_gps_latitude_t lat;
-  // lat.latitude = latitude;
-  lat.latitude = 51.062442876770696; // Example latitude, replace with actual value
+  lat.latitude = latitude;
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_GPS_LATITUDE_IS_EXTENDED;
@@ -209,8 +211,8 @@ void can_callback_gps_longitude(se::CanBase &can, se::CanDataFrame &msg, void *a
   auto nmea_data = modem->get_nmea_data();
   auto longitude = nmea_data.valueOrDie().get_gga_data().longitude;
   can_gps_longitude_t lon;
-  // lon.longitude = longitude;
-  lon.longitude = 16.980411413875135;
+  lon.longitude = longitude;
+  // lon.longitude = 16.980411413875135;
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_GPS_LONGITUDE_IS_EXTENDED;
