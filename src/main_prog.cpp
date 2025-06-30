@@ -144,6 +144,12 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
     return task.task_get_status();
   }
 
+  auto as = bno055->get_calibration_data();
+  if(as.calibrated) {
+    gpio_user_led_2.toggle();
+    log_info("BNO055 is calibrated");
+  }
+
   gpio_user_led_1.toggle();
   return Status::OK();
 }
