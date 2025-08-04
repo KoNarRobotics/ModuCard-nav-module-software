@@ -86,34 +86,33 @@ Status init_board(se::SimpleTask &task, void *pvParameters) {
   se::sensors::imu::BNO0055_Settings bno055_settings;
   bno055_settings.calibration_data.calibrated = true;
   bno055_settings.calibration_data.data[0]    = 0;
-    bno055_settings.calibration_data.data[1]    = 64;
-     bno055_settings.calibration_data.data[2]    = 0;
-     bno055_settings.calibration_data.data[3]    = 0;
-     bno055_settings.calibration_data.data[4]    = 0;
-     bno055_settings.calibration_data.data[5]    = 0;
-     bno055_settings.calibration_data.data[6]    = 0;
-     bno055_settings.calibration_data.data[7]    = 0;
-     bno055_settings.calibration_data.data[8]    = 0;
-     bno055_settings.calibration_data.data[9]    = 64;
-     bno055_settings.calibration_data.data[10]    = 0;
-     bno055_settings.calibration_data.data[11]    = 0;
-     bno055_settings.calibration_data.data[12]    = 0;
-     bno055_settings.calibration_data.data[13]    = 0;
-     bno055_settings.calibration_data.data[14]    = 0;
-     bno055_settings.calibration_data.data[15]    = 0;
-     bno055_settings.calibration_data.data[16]    = 0;
-     bno055_settings.calibration_data.data[17]    = 64;
-     bno055_settings.calibration_data.data[18]    = 57;
-     bno055_settings.calibration_data.data[19]    = 0;
-     bno055_settings.calibration_data.data[20]    = 194;
-     bno055_settings.calibration_data.data[21]    = 255;
-     bno055_settings.calibration_data.data[22]    = 236;
-     bno055_settings.calibration_data.data[23]    = 255;
-     bno055_settings.calibration_data.data[24]    = 201;
-     bno055_settings.calibration_data.data[25]    = 1;
-     bno055_settings.calibration_data.data[26]    = 166;
-     bno055_settings.calibration_data.data[27]    = 1;
-
+  bno055_settings.calibration_data.data[1]    = 64;
+  bno055_settings.calibration_data.data[2]    = 0;
+  bno055_settings.calibration_data.data[3]    = 0;
+  bno055_settings.calibration_data.data[4]    = 0;
+  bno055_settings.calibration_data.data[5]    = 0;
+  bno055_settings.calibration_data.data[6]    = 0;
+  bno055_settings.calibration_data.data[7]    = 0;
+  bno055_settings.calibration_data.data[8]    = 0;
+  bno055_settings.calibration_data.data[9]    = 64;
+  bno055_settings.calibration_data.data[10]   = 0;
+  bno055_settings.calibration_data.data[11]   = 0;
+  bno055_settings.calibration_data.data[12]   = 0;
+  bno055_settings.calibration_data.data[13]   = 0;
+  bno055_settings.calibration_data.data[14]   = 0;
+  bno055_settings.calibration_data.data[15]   = 0;
+  bno055_settings.calibration_data.data[16]   = 0;
+  bno055_settings.calibration_data.data[17]   = 64;
+  bno055_settings.calibration_data.data[18]   = 57;
+  bno055_settings.calibration_data.data[19]   = 0;
+  bno055_settings.calibration_data.data[20]   = 194;
+  bno055_settings.calibration_data.data[21]   = 255;
+  bno055_settings.calibration_data.data[22]   = 236;
+  bno055_settings.calibration_data.data[23]   = 255;
+  bno055_settings.calibration_data.data[24]   = 201;
+  bno055_settings.calibration_data.data[25]   = 1;
+  bno055_settings.calibration_data.data[26]   = 166;
+  bno055_settings.calibration_data.data[27]   = 1;
 
 
   se::DeviceThreadedSettings settings_at;
@@ -123,27 +122,27 @@ Status init_board(se::SimpleTask &task, void *pvParameters) {
   STMEPIC_ASSING_TO_OR_RETURN(atmodem, se::modems::AtModem::Make(uart4));
   STMEPIC_RETURN_ON_ERROR(atmodem->device_set_settings(atmodem_settings));
   STMEPIC_RETURN_ON_ERROR(atmodem->device_task_set_settings(settings));
-  // STMEPIC_RETURN_ON_ERROR(atmodem->device_task_start());
+  // STMEPIC_RETURN_ON_ERROR(atmodem->device_start());
   // STMEPIC_RETURN_ON_ERROR(atmodem->device_task_wait_for_device_to_start();
 
 
   STMEPIC_ASSING_TO_OR_RETURN(bno055, se::sensors::imu::BNO055::Make(i2c1));
   STMEPIC_RETURN_ON_ERROR(bno055->device_set_settings(bno055_settings));
   STMEPIC_RETURN_ON_ERROR(bno055->device_task_set_settings(settings));
-  STMEPIC_RETURN_ON_ERROR(bno055->device_task_start());
-  STMEPIC_RETURN_ON_ERROR(bno055->device_task_wait_for_device_to_start());
+  STMEPIC_RETURN_ON_ERROR(bno055->device_start());
+  STMEPIC_RETURN_ON_ERROR(bno055->device_wait_for_device_to_start());
 
 
   // STMEPIC_ASSING_TO_OR_HRESET(icm20948, se::sensors::imu::ICM20948::Make(i2c1,
   // se::sensors::imu::internal::ICM20948_I2C_ADDRESS_2)); icm20948->device_task_set_settings(settings);
-  // STMEPIC_NONE_OR_HRESET(icm20948->device_task_start());
+  // STMEPIC_NONE_OR_HRESET(icm20948->device_start());
 
 
   STMEPIC_ASSING_TO_OR_RETURN(bmp280, se::sensors::barometer::BMP280::Make(i2c1));
   bmp280->device_task_set_settings(settings);
   // bmp280->device_start();
-  STMEPIC_RETURN_ON_ERROR(bmp280->device_task_start());
-  STMEPIC_RETURN_ON_ERROR(bmp280->device_task_wait_for_device_to_start());
+  STMEPIC_RETURN_ON_ERROR(bmp280->device_start());
+  STMEPIC_RETURN_ON_ERROR(bmp280->device_wait_for_device_to_start());
 
 
   STMEPIC_RETURN_ON_ERROR(fdcan->add_callback(CAN_BAROMETER_STATUS_FRAME_ID, can_callback_bmp280_get_status, bmp280.get()));
