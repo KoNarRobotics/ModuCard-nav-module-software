@@ -73,7 +73,8 @@
     "variant": "cpp",
     "source_location": "c",
     "complex": "cpp",
-    "usb_device.h": "c"
+    "usb_device.h": "c",
+    "text_encoding": "cpp"
   },
   "editor.formatOnSave": true,
   "python.autoComplete.extraPaths": [
