@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/StmEpic" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/StmEpic/etl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/can_constants" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/stm32-mw-usb-device" vcs="Git" />
+  </component>
+</project>
