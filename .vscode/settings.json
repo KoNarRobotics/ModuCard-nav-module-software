@@ -87,5 +87,6 @@
   ],
   "cortex-debug.variableUseNaturalFormat": true,
   "ros.distro": "jazzy",
+  "idf.pythonInstallPath": "/usr/bin/python3",
   // "cortex-debug.gdbPath": "gdb-multiarch"
 }
