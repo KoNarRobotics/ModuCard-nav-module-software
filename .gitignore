@@ -38,3 +38,6 @@ build
 CMakePresets.json
 
 .vscode/gdb-port.txt
+
+
+.cache
