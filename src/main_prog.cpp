@@ -127,7 +127,7 @@ Status init_board(se::SimpleTask &task, void *pvParameters) {
 
 
   STMEPIC_ASSING_TO_OR_RETURN(bno055, se::sensors::imu::BNO055::Make(i2c1));
-  STMEPIC_RETURN_ON_ERROR(bno055->device_set_settings(bno055_settings));
+  // STMEPIC_RETURN_ON_ERROR(bno055->device_set_settings(bno055_settings));
   STMEPIC_RETURN_ON_ERROR(bno055->device_task_set_settings(settings));
   STMEPIC_RETURN_ON_ERROR(bno055->device_start());
   STMEPIC_RETURN_ON_ERROR(bno055->device_wait_for_device_to_start());
@@ -177,6 +177,8 @@ Status task_blink_func(se::SimpleTask &task, void *pvParameters) {
     gpio_user_led_2.toggle();
     log_info("BNO055 is calibrated");
   }
+  auto d = bno055->get_data().valueOrDie();
+  log_info("IMU Data:" + d.to_string());
 
   gpio_user_led_1.toggle();
   return Status::OK();
@@ -195,7 +197,7 @@ void main_prog() {
 
   // INIT LOGGER
   std::string version = std::to_string(VERSION_MAJOR) + "." + std::to_string(VERSION_MINOR) + "." + std::to_string(VERSION_BUILD);
-  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, false, version);
+  se::Logger::get_instance().init(se::LOG_LEVEL::LOG_LEVEL_DEBUG, true, TEMPLATE_Transmit, true, version);
 
   // INIT UART HANDLERS
   STMEPIC_ASSING_TO_OR_HRESET(uart4, se::UART::Make(huart4, se::HardwareType::IT));

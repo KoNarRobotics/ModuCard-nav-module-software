@@ -7,7 +7,28 @@ main_file="Core/Src/main.c"
 main_file_cpp="Core/Src/main.cpp"
 include_file="Core/Inc/main.hpp"
 cmake_file="cmake/stm32cubemx/CMakeLists.txt"
+cmake_tool_chain_file="cmake/gcc-arm-none-eabi.cmake"
 heap_file="Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c"
+hal_config_file="Core/Inc/stm32h5xx_hal_conf.h"
+
+function enable_module {
+  local module_name="$1"
+  if grep -q "/\*#define ${module_name} \*/" "$hal_config_file"; then
+    sed -i "s|/\*#define ${module_name} \*/|#define ${module_name}|" "$hal_config_file"
+  fi
+}
+
+function remove_fixed_length_function {
+  local file="$1"; local pattern="$2"; local lines="$3"
+  local tmp
+  tmp=$(mktemp) || return 1
+  awk -v pat="$pattern" -v n="$lines" '
+    { if (!skipping && $0 ~ pat) { skipping = n; next }
+      if (skipping > 0) { skipping--; next }
+      print
+    }' "$file" > "$tmp" && mv "$tmp" "$file"
+}
+
 
 
 if [ -f $main_file ]; then
@@ -42,6 +63,18 @@ if [ -f $main_file ]; then
     sed -i 's|\.\./\.\./Core/Src/main\.c|../../Core/Src/main.cpp|' $cmake_file
   fi
 
+  # Remove "-fno-rtti" from the CMake file
+  sed -i 's/-fno-rtti//g' $cmake_tool_chain_file
+
+
+  enable_module "HAL_I2C_MODULE_ENABLED"
+  enable_module "HAL_UART_MODULE_ENABLED"
+  enable_module "HAL_TIM_MODULE_ENABLED"
+  enable_module "HAL_SPI_MODULE_ENABLED"
+  enable_module "HAL_FDCAN_MODULE_ENABLED"
+  enable_module "HAL_GPIO_MODULE_ENABLED"
+
+  remove_fixed_length_function $main_file_cpp "void HAL_TIM_PeriodElapsedCallback" 11
 
   # Remove the line containing MX_FREERTOS_Init();
   sed -i '/MX_FREERTOS_Init();/d' $main_file_cpp

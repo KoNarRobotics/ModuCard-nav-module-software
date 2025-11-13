@@ -83,10 +83,15 @@ void can_callback_imu_orientation(se::CanBase &can, se::CanDataFrame &msg, void 
   }
   auto data_value = data.valueOrDie();
   can_imu_orientation_t ms;
-  ms.w = data_value.qua.w;
-  ms.x = data_value.qua.x;
-  ms.y = data_value.qua.y;
-  ms.z = data_value.qua.z;
+  // ms.w = data_value.quaternion.w;
+  // ms.x = data_value.quaternion.x;
+  // ms.y = data_value.quaternion.y;
+  // ms.z = data_value.quaternion.z;
+  ms.w = can_imu_orientation_w_encode(data_value.quaternion.w);
+  ms.x = can_imu_orientation_x_encode(data_value.quaternion.x);
+  ms.y = can_imu_orientation_y_encode(data_value.quaternion.y);
+  ms.z = can_imu_orientation_z_encode(data_value.quaternion.z);
+
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_IMU_ORIENTATION_IS_EXTENDED;
@@ -107,9 +112,12 @@ void can_callback_imu_lin_acceleration(se::CanBase &can, se::CanDataFrame &msg, 
   }
   auto data_value = data.valueOrDie();
   can_imu_linear_acceleration_t ms;
-  ms.x = data_value.lia.x;
-  ms.y = data_value.lia.y;
-  ms.z = data_value.lia.z;
+  // ms.x = data_value.linear_acceleration.x;
+  // ms.y = data_value.linear_acceleration.y;
+  // ms.z = data_value.linear_acceleration.z;
+  ms.x = can_imu_linear_acceleration_x_encode(data_value.linear_acceleration.x);
+  ms.y = can_imu_linear_acceleration_y_encode(data_value.linear_acceleration.y);
+  ms.z = can_imu_linear_acceleration_z_encode(data_value.linear_acceleration.z);
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_IMU_LINEAR_ACCELERATION_IS_EXTENDED;
@@ -130,9 +138,12 @@ void can_callback_imu_magnetic_field(se::CanBase &can, se::CanDataFrame &msg, vo
   }
   auto data_value = data.valueOrDie();
   can_imu_magnetic_field_t ms;
-  ms.x = data_value.mag.x;
-  ms.y = data_value.mag.y;
-  ms.z = data_value.mag.z;
+  // ms.x = data_value.magnetic_field.x;
+  // ms.y = data_value.magnetic_field.y;
+  // ms.z = data_value.magnetic_field.z;
+  ms.x = can_imu_magnetic_field_x_encode(data_value.magnetic_field.x);
+  ms.y = can_imu_magnetic_field_y_encode(data_value.magnetic_field.y);
+  ms.z = can_imu_magnetic_field_z_encode(data_value.magnetic_field.z);
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_IMU_MAGNETIC_FIELD_IS_EXTENDED;
@@ -154,9 +165,12 @@ void can_callback_imu_gyration(se::CanBase &can, se::CanDataFrame &msg, void *ar
   }
   auto data_value = data.valueOrDie();
   can_imu_gyration_t ms;
-  ms.x = data_value.gyr.x;
-  ms.y = data_value.gyr.y;
-  ms.z = data_value.gyr.z;
+  // ms.x = data_value.gyration.x;
+  // ms.y = data_value.gyration.y;
+  // ms.z = data_value.gyration.z;
+  ms.x = can_imu_gyration_x_encode(data_value.gyration.x);
+  ms.y = can_imu_gyration_y_encode(data_value.gyration.y);
+  ms.z = can_imu_gyration_z_encode(data_value.gyration.z);
 
   se::CanDataFrame frame;
   frame.extended_id    = CAN_IMU_GYRATION_IS_EXTENDED;
